@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/control_ll"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:orientation="horizontal"
+    android:layout_gravity="bottom"
+    android:background="@color/white"
+    android:gravity="center_vertical"
+    android:padding="8dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.like.LikeButton
+        android:id="@+id/art_like_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        app:icon_type="heart"
+        app:icon_size="28dp"
+        android:gravity="center"/>
+    <ImageButton
+        android:id="@+id/art_comment_ib"
+        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:src="@drawable/ic_comment"
+
+        android:background="@color/transparent"
+        android:contentDescription="@string/app_name"/>
+</LinearLayout>

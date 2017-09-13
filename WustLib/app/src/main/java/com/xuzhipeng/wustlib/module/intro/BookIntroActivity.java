@@ -1,0 +1,165 @@
+package com.xuzhipeng.wustlib.module.intro;
+
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.xuzhipeng.wustlib.R;
+import com.xuzhipeng.wustlib.base.BaseActivity;
+import com.xuzhipeng.wustlib.model.BookIntro;
+import com.xuzhipeng.wustlib.module.adapter.BookIntroAdapter;
+import com.xuzhipeng.wustlib.module.info.BookInfoActivity;
+import com.xuzhipeng.wustlib.presenter.BookIntroPresenter;
+import com.xuzhipeng.wustlib.view.IBookIntroView;
+
+import java.util.List;
+
+public class BookIntroActivity extends BaseActivity implements IBookIntroView, View
+        .OnClickListener {
+
+    private static final String ARGS_URL_SEARCH = "search_url";
+    private static final String ARGS_DISPLAY_PG = "DISPLAY_PG";
+    private TextView mBookTotalTv;
+    private RecyclerView mBooksRecyclerView;
+    private Button mPreviousBtn;
+    private TextView mPageNumTv;
+    private Button mNextBtn;
+
+    private BookIntroAdapter mAdapter;
+    private List<BookIntro> mIntros;
+    private int mDisPg;
+    private int mCurPg; //当前页码
+    private int mTotalPg; // 页码总数
+    private String mUrl;
+    private BookIntroPresenter mPresenter;
+
+    public static Intent newIntent(Context context, String url, int display) {
+        Intent intent = new Intent(context, BookIntroActivity.class);
+        intent.putExtra(ARGS_URL_SEARCH, url);
+        intent.putExtra(ARGS_DISPLAY_PG, display);
+        return intent;
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_book_intro;
+    }
+
+    @Override
+    protected void initView() {
+        setToolbar(R.string.search_result,null);
+        mBookTotalTv = (TextView) findViewById(R.id.book_total_tv);
+        mBooksRecyclerView = (RecyclerView) findViewById(R.id.books_recycler_view);
+        mPreviousBtn = (Button) findViewById(R.id.previous_btn);
+        mPreviousBtn.setOnClickListener(this);
+        mPageNumTv = (TextView) findViewById(R.id.page_num_tv);
+        mNextBtn = (Button) findViewById(R.id.next_btn);
+        mNextBtn.setOnClickListener(this);
+
+        mAdapter = new BookIntroAdapter(R.layout.item_book_intro,null,this);
+        mAdapter.openLoadAnimation(BaseQuickAdapter.SLIDEIN_LEFT);
+        mBooksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mBooksRecyclerView.setAdapter(mAdapter);
+    }
+
+    @Override
+    protected void setListener() {
+        mAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                startActivity(BookInfoActivity.newIntent(
+                        BookIntroActivity.this,mIntros.get(position).getInfoUrl()));
+            }
+        });
+    }
+
+    @Override
+    protected void getExtra() {
+        mDisPg = getIntent().getIntExtra(ARGS_DISPLAY_PG,20);
+        mUrl = getIntent().getStringExtra(ARGS_URL_SEARCH);
+    }
+
+    @Override
+    protected void initData() {
+        mPresenter = new BookIntroPresenter(this);
+        mCurPg = 1 ; //初始页为 1
+
+        mPresenter.loadResult(mUrl);
+        mPresenter.loadBookIntros(mUrl);
+    }
+
+    @Override
+    public void setResult(String result) {
+        mBookTotalTv.setText(result);
+    }
+
+    @Override
+    public void setIntros(List<BookIntro> intros) {
+        mIntros = intros;
+        mAdapter.setNewData(mIntros);
+        mBooksRecyclerView.smoothScrollToPosition(0);
+
+        if(mCurPg == 1){
+            mPreviousBtn.setEnabled(false);
+        }
+        setNextBtnEnable();
+    }
+
+    @Override
+    public void setPageNum(int pageNum) {
+        mTotalPg = (int)Math.ceil((double)pageNum/mDisPg);
+        setNextBtnEnable();
+        setPageText(mCurPg);
+    }
+
+    /**
+     *  设置
+     */
+    private void setNextBtnEnable() {
+        if(mCurPg == mTotalPg){
+            mNextBtn.setEnabled(false);
+        }
+    }
+
+    /**
+     *  设置页码 textView
+     */
+    private void setPageText(int mCurPg) {
+        mPageNumTv.setText(mCurPg+"/"+mTotalPg);
+    }
+
+
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.previous_btn:
+                if(mCurPg > 1 ){
+                    String url = Uri.parse(mUrl).buildUpon()
+                            .appendQueryParameter("page",String.valueOf(--mCurPg))
+                            .build().toString();
+                    mPresenter.loadBookIntros(url);
+                    setPageText(mCurPg);
+                }
+                break;
+            case R.id.next_btn:
+                if(mCurPg < mTotalPg){
+                    String url = Uri.parse(mUrl).buildUpon()
+                            .appendQueryParameter("page",String.valueOf(++mCurPg))
+                            .build().toString();
+                    mPresenter.loadBookIntros(url);
+                    setPageText(mCurPg);
+                }
+                break;
+        }
+    }
+
+
+}
