@@ -25,6 +25,12 @@
         </activity>
         <activity android:name=".module.info.BookInfoActivity">
         </activity>
+        <activity android:name=".module.mylib.LoginActivity">
+        </activity>
+        <activity android:name=".module.mylib.MyLibActivity">
+        </activity>
+        <activity android:name=".module.collection.CollectActivity">
+        </activity>
     </application>
 
 </manifest>

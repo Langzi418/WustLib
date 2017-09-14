@@ -4,7 +4,6 @@ import android.support.annotation.Nullable;
 
 import com.xuzhipeng.wustlib.model.BookIntro;
 import com.xuzhipeng.wustlib.model.HotSearch;
-import com.xuzhipeng.wustlib.model.LibInfo;
 import com.xuzhipeng.wustlib.model.Result;
 
 import java.lang.annotation.Annotation;
@@ -42,8 +41,6 @@ public class JsoupConverterFactory extends Converter.Factory{
             }
         }else if(type == Result.class){
             return new ResultConverter();
-        }else if(type == LibInfo.class){
-            return new LibInfoConverter();
         }
 
         return null;

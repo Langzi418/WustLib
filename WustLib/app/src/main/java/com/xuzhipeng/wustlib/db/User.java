@@ -6,60 +6,52 @@ import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.OrderBy;
 import org.greenrobot.greendao.annotation.ToMany;
+import org.greenrobot.greendao.annotation.Unique;
 
 import java.util.List;
 
 /**
  * Author: xuzhipeng
  * Email: langzi0418@gmail.com
- * Date: 2017/9/12
+ * Date: 2017/9/14
  * Desc:
  */
 
-
 @Entity
-public class Book {
+public class User {
+
+    private static final String TAG = "User";
 
     @Id(autoincrement = true)
     private Long Id;
 
-    private String isbn;
+    @Unique
+    private String stuId;
     private String name;
-    private String imgUrl;
-    private String infoUrl;
-    private String category;
-    private boolean like;
 
-    //表关联
-    private Long userId;
 
-    @ToMany(referencedJoinProperty = "bookId")
-    @OrderBy("date DESC")
-    private List<Comment> comments;
+    
+    @ToMany(referencedJoinProperty = "userId")
+    @OrderBy("category ASC")
+    private List<Book> books;
 
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
 
     /** Used for active entity operations. */
-    @Generated(hash = 1097957864)
-    private transient BookDao myDao;
+    @Generated(hash = 1507654846)
+    private transient UserDao myDao;
 
-    @Generated(hash = 373681075)
-    public Book(Long Id, String isbn, String name, String imgUrl, String infoUrl,
-            String category, boolean like, Long userId) {
+    @Generated(hash = 2085563445)
+    public User(Long Id, String stuId, String name) {
         this.Id = Id;
-        this.isbn = isbn;
+        this.stuId = stuId;
         this.name = name;
-        this.imgUrl = imgUrl;
-        this.infoUrl = infoUrl;
-        this.category = category;
-        this.like = like;
-        this.userId = userId;
     }
 
-    @Generated(hash = 1839243756)
-    public Book() {
+    @Generated(hash = 586692638)
+    public User() {
     }
 
     public Long getId() {
@@ -70,12 +62,12 @@ public class Book {
         this.Id = Id;
     }
 
-    public String getIsbn() {
-        return this.isbn;
+    public String getStuId() {
+        return this.stuId;
     }
 
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
+    public void setStuId(String stuId) {
+        this.stuId = stuId;
     }
 
     public String getName() {
@@ -86,72 +78,32 @@ public class Book {
         this.name = name;
     }
 
-    public String getImgUrl() {
-        return this.imgUrl;
-    }
-
-    public void setImgUrl(String imgUrl) {
-        this.imgUrl = imgUrl;
-    }
-
-    public String getInfoUrl() {
-        return this.infoUrl;
-    }
-
-    public void setInfoUrl(String infoUrl) {
-        this.infoUrl = infoUrl;
-    }
-
-    public String getCategory() {
-        return this.category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public boolean getLike() {
-        return this.like;
-    }
-
-    public void setLike(boolean like) {
-        this.like = like;
-    }
-
-    public Long getUserId() {
-        return this.userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
     /**
      * To-many relationship, resolved on first access (and after reset).
      * Changes to to-many relations are not persisted, make changes to the target entity.
      */
-    @Generated(hash = 1957521546)
-    public List<Comment> getComments() {
-        if (comments == null) {
+    @Generated(hash = 172339346)
+    public List<Book> getBooks() {
+        if (books == null) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
                 throw new DaoException("Entity is detached from DAO context");
             }
-            CommentDao targetDao = daoSession.getCommentDao();
-            List<Comment> commentsNew = targetDao._queryBook_Comments(Id);
+            BookDao targetDao = daoSession.getBookDao();
+            List<Book> booksNew = targetDao._queryUser_Books(Id);
             synchronized (this) {
-                if (comments == null) {
-                    comments = commentsNew;
+                if (books == null) {
+                    books = booksNew;
                 }
             }
         }
-        return comments;
+        return books;
     }
 
     /** Resets a to-many relationship, making the next get call to query for a fresh result. */
-    @Generated(hash = 249603048)
-    public synchronized void resetComments() {
-        comments = null;
+    @Generated(hash = 353255226)
+    public synchronized void resetBooks() {
+        books = null;
     }
 
     /**
@@ -191,11 +143,13 @@ public class Book {
     }
 
     /** called by internal mechanisms, do not call yourself. */
-    @Generated(hash = 1115456930)
+    @Generated(hash = 2059241980)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
-        myDao = daoSession != null ? daoSession.getBookDao() : null;
+        myDao = daoSession != null ? daoSession.getUserDao() : null;
     }
 
 
+
 }
+

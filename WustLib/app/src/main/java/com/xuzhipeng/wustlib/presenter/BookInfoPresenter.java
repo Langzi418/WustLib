@@ -2,14 +2,22 @@ package com.xuzhipeng.wustlib.presenter;
 
 import android.util.Log;
 
+import com.google.gson.Gson;
 import com.xuzhipeng.wustlib.BuildConfig;
+import com.xuzhipeng.wustlib.common.app.App;
 import com.xuzhipeng.wustlib.common.util.HttpUtil;
+import com.xuzhipeng.wustlib.common.util.PrefUtil;
+import com.xuzhipeng.wustlib.db.Book;
+import com.xuzhipeng.wustlib.db.DBUtil;
 import com.xuzhipeng.wustlib.model.BookStatus;
 import com.xuzhipeng.wustlib.model.DouBanInfo;
+import com.xuzhipeng.wustlib.model.DouComment;
 import com.xuzhipeng.wustlib.model.LibInfo;
 import com.xuzhipeng.wustlib.net.api.ApiManager;
 import com.xuzhipeng.wustlib.view.IBookInfoView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -117,7 +125,7 @@ public class BookInfoPresenter extends BasePresenter<IBookInfoView> {
 
 
     public void loadDoubanInfo(String url) {
-        ApiManager.getBookInfoApi()
+        ApiManager.getDouBanInfoApi()
                 .getDouBanInfo(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -135,14 +143,104 @@ public class BookInfoPresenter extends BasePresenter<IBookInfoView> {
                     @Override
                     public void onError(@NonNull Throwable e) {
                         mView.setDouBanInfo(null);
-                        if(BuildConfig.DEBUG) Log.d(TAG, "onError: ",e);
+                        if(BuildConfig.DEBUG) Log.d(TAG, "doubanInfoError: ",e);
                     }
 
                     @Override
                     public void onComplete() {
+
                     }
                 });
+
+
     }
 
 
+    public void loadDouBanCmt(final String url) {
+        Observable.create(new ObservableOnSubscribe<List<DouComment>>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<List<DouComment>> e) throws Exception {
+                List<DouComment> comments = new ArrayList<>();
+                Response response = HttpUtil.sendOkHttp(url);
+                if (response.isSuccessful()) {
+                    JSONObject obj = new JSONObject(response.body().string());
+                    JSONArray reviewArr = obj.getJSONArray("reviews");
+                    for (int i = 0; i < reviewArr.length(); i++) {
+                        String reviewCon = reviewArr.getJSONObject(i).toString();
+                        DouComment comment = new Gson().fromJson(reviewCon, DouComment.class);
+                        comments.add(comment);
+                    }
+                }
+
+                e.onNext(comments);
+                e.onComplete();
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<DouComment>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(@NonNull List<DouComment> douComments) {
+                        mView.setDouBanCmt(douComments);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        mView.setDouBanCmt(null);
+                        if (BuildConfig.DEBUG)
+                            Log.d(TAG, "onError: ", e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+    }
+
+    /**
+     * 检测是否持久化
+     */
+    public void loadBook(final String isbn) {
+        Observable.create(new ObservableOnSubscribe<Book>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Book> e) throws Exception {
+                Book book = null;
+                long userId = PrefUtil.getUserId(App.getContext());
+                List<Book> books = DBUtil.queryBookIfExist(isbn,userId);
+                if(books.size()>0){
+                    book = books.get(0);
+                }
+
+                e.onNext(book);
+                e.onComplete();
+            }
+        }).subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Observer<Book>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+
+            }
+
+            @Override
+            public void onNext(@NonNull Book book) {
+                mView.setBook(book);
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+                mView.setBook(null);
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
+    }
 }

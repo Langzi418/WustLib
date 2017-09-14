@@ -10,9 +10,12 @@ import com.xuzhipeng.wustlib.net.RetrofitClient;
  */
 
 public class ApiManager {
+
+    public static final String BASE_DOU_BAN = "https://api.douban.com/v2/book/isbn/";
+
     private static HotSearchApi hotSearchApi;
     private static IntroAPi introAPi;
-    private static BookInfoApi bookInfoApi;
+    private static DouBanInfoApi douBanInfoApi;
 
     public static HotSearchApi getHotSearchApi(){
         if(hotSearchApi == null){
@@ -26,16 +29,16 @@ public class ApiManager {
         if(introAPi == null){
             introAPi = RetrofitClient.getInstance().create(IntroAPi.class);
         }
-
         return introAPi;
     }
 
-    public static BookInfoApi getBookInfoApi(){
-        if(bookInfoApi == null){
-            bookInfoApi = RetrofitClient.getInstance().create(BookInfoApi.class);
+    public static DouBanInfoApi getDouBanInfoApi(){
+        if(douBanInfoApi == null){
+            douBanInfoApi = RetrofitClient.getInstance().create(DouBanInfoApi.class);
         }
-
-        return bookInfoApi;
+        return douBanInfoApi;
     }
+
+
 
 }

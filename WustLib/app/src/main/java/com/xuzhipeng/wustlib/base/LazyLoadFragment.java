@@ -45,9 +45,23 @@ public abstract class LazyLoadFragment extends Fragment implements ILoadView {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(getLayoutId(),container,false);
         initView(view);
+        setView();
+        getExtra();
 
         isViewCreated = true;
         return view;
+    }
+
+    protected void getExtra() {
+
+    }
+
+
+    /**
+     *  设置视图
+     */
+    protected void setView() {
+
     }
 
     @Override

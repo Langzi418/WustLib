@@ -41,6 +41,7 @@ public abstract class BaseActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
         initView();
+        setView();
         setListener();
         getExtra();
         initData();
@@ -50,6 +51,13 @@ public abstract class BaseActivity extends AppCompatActivity
             ActivityCompat.requestPermissions(this, new String[]
                     {Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         }
+    }
+
+    /**
+     * 初始设置布局
+     */
+    protected void setView() {
+
     }
 
 

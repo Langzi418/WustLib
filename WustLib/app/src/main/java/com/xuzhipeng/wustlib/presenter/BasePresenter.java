@@ -17,4 +17,6 @@ public class BasePresenter<T>  {
     public void detachView() {
         mView = null;
     }
+
+
 }

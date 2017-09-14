@@ -72,11 +72,9 @@ public class ViewUtil {
      */
     public static void useGlideBlur(Context context,String url,ImageView iv){
         Glide.with(context).load(url)
-                .error(R.drawable.default_book)
                 .bitmapTransform(new BlurTransformation(context, 20),
                         new CenterCrop(context))
                 .into(iv);
-
 
     }
 
