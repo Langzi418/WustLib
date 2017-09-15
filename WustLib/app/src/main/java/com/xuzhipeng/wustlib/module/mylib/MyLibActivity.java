@@ -23,27 +23,6 @@ public class MyLibActivity extends BaseActivity {
     }
 
 
-    //    @Override
-    //    public boolean onCreateOptionsMenu(Menu menu) {
-    //        getMenuInflater().inflate(R.menu.menu_toolbar,menu);
-    //        return true;
-    //    }
-    //
-    //    @Override
-    //    public boolean onOptionsItemSelected(MenuItem item) {
-    //        switch (item.getItemId()) {
-    //            case R.id.login_out:
-    //                Preferences.setUser(this,null); //清空用户信息
-    //                Preferences.setPwd(this,null);
-    //                Preferences.setSuccess(this,false); //不在登陆状态
-    //                startActivity(LoginActivity.newIntent(this));
-    //                finish(); //摧毁活动
-    //                break;
-    //            default:
-    //        }
-    //        return super.onOptionsItemSelected(item);
-    //    }
-
     @Override
     protected int getLayoutId() {
         return R.layout.activity_my_lib;

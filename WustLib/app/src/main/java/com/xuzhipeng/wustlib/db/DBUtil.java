@@ -70,12 +70,17 @@ public class DBUtil {
     /**
      * 根据isbn userId 找到某本书
      */
-    public static List<Book> queryBookIfExist(String isbn, long userId) {
+    public static Book queryBookIfExist(String isbn, long userId) {
         QueryBuilder<Book> builder = getBookDao().queryBuilder();
         return builder
                 .where(BookDao.Properties.Isbn.eq(isbn),
                         BookDao.Properties.UserId.eq(userId))
-                .build().list();
+                .build().unique();
+    }
+
+    public static List<Book> queryBookByIsbn(String isbn) {
+        QueryBuilder<Book> builder = getBookDao().queryBuilder();
+        return builder.where(BookDao.Properties.Isbn.eq(isbn)).build().list();
     }
 
     public static Long insertBook(Book book) {
@@ -92,6 +97,10 @@ public class DBUtil {
         updateBook(book);
     }
 
+    // 评论相关
+    public static Long insertComment(Comment comment) {
+        return getCommentDao().insert(comment);
+    }
 
 
 }

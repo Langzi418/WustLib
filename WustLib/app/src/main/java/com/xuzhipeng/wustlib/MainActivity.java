@@ -86,6 +86,11 @@ public class MainActivity extends BaseActivity  {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.nav_change:
+                        //登录状态设为false
+                        PrefUtil.setSuccess(MainActivity.this,false);
+                        startActivity(LoginActivity.newIntent(MainActivity.this));
+                        break;
                     case R.id.nav_mylib:
                         goIfLogin();
                         break;

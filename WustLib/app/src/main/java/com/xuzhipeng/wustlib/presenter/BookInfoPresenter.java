@@ -8,6 +8,7 @@ import com.xuzhipeng.wustlib.common.app.App;
 import com.xuzhipeng.wustlib.common.util.HttpUtil;
 import com.xuzhipeng.wustlib.common.util.PrefUtil;
 import com.xuzhipeng.wustlib.db.Book;
+import com.xuzhipeng.wustlib.db.Comment;
 import com.xuzhipeng.wustlib.db.DBUtil;
 import com.xuzhipeng.wustlib.model.BookStatus;
 import com.xuzhipeng.wustlib.model.DouBanInfo;
@@ -143,7 +144,8 @@ public class BookInfoPresenter extends BasePresenter<IBookInfoView> {
                     @Override
                     public void onError(@NonNull Throwable e) {
                         mView.setDouBanInfo(null);
-                        if(BuildConfig.DEBUG) Log.d(TAG, "doubanInfoError: ",e);
+                        if (BuildConfig.DEBUG)
+                            Log.d(TAG, "doubanInfoError: ", e);
                     }
 
                     @Override
@@ -155,6 +157,51 @@ public class BookInfoPresenter extends BasePresenter<IBookInfoView> {
 
     }
 
+    /**
+     * 通过isbn查找书籍,可能多位用户同时评论某本书，所以必须遍历所有的
+     */
+    public void loadComment(final String isbn) {
+        Observable.create(new ObservableOnSubscribe<List<Comment>>() {
+
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<List<Comment>> e) throws Exception {
+                List<Comment> comments = new ArrayList<>();
+                List<Book> books = DBUtil.queryBookByIsbn(isbn);
+                for (int i = books.size() - 1; i >= 0; i--) {
+                    Book book = books.get(i);
+                    book.resetComments();
+                    comments.addAll(book.getComments());
+                    if (BuildConfig.DEBUG)
+                        Log.d(TAG, "subscribe: " + comments.size());
+                }
+
+                e.onNext(comments);
+                e.onComplete();
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<Comment>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(@NonNull List<Comment> comments) {
+                        mView.setComments(comments);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        mView.setComments(null);
+                        if (BuildConfig.DEBUG)
+                            Log.d(TAG, "loadLocalComment: ", e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
+    }
 
     public void loadDouBanCmt(final String url) {
         Observable.create(new ObservableOnSubscribe<List<DouComment>>() {
@@ -209,38 +256,33 @@ public class BookInfoPresenter extends BasePresenter<IBookInfoView> {
         Observable.create(new ObservableOnSubscribe<Book>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<Book> e) throws Exception {
-                Book book = null;
                 long userId = PrefUtil.getUserId(App.getContext());
-                List<Book> books = DBUtil.queryBookIfExist(isbn,userId);
-                if(books.size()>0){
-                    book = books.get(0);
-                }
-
+                Book book = DBUtil.queryBookIfExist(isbn, userId);
                 e.onNext(book);
                 e.onComplete();
             }
         }).subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Observer<Book>() {
-            @Override
-            public void onSubscribe(@NonNull Disposable d) {
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Book>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
 
-            }
+                    }
 
-            @Override
-            public void onNext(@NonNull Book book) {
-                mView.setBook(book);
-            }
+                    @Override
+                    public void onNext(@NonNull Book book) {
+                        mView.setBook(book);
+                    }
 
-            @Override
-            public void onError(@NonNull Throwable e) {
-                mView.setBook(null);
-            }
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        mView.setBook(null);
+                    }
 
-            @Override
-            public void onComplete() {
+                    @Override
+                    public void onComplete() {
 
-            }
-        });
+                    }
+                });
     }
 }

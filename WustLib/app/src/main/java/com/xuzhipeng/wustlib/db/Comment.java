@@ -54,7 +54,7 @@ public class Comment {
         this.content = content;
     }
 
-    public Date getDate() {
+    public Date  getDate() {
         return this.date;
     }
 

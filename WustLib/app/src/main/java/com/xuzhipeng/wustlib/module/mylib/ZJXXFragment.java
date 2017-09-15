@@ -151,16 +151,21 @@ public class ZJXXFragment extends LazyLoadFragment {
      * 数据库中不存在则保存
      */
     private void checkIfInsert(String username) {
+        //刷新用户名
+        PrefUtil.setUserName(getActivity(),username);
         User user = DBUtil.queryUserByStuNo(PrefUtil.getUserNo(getActivity()));
         if (user != null) {
+            //用户信息存在，不存储，但刷新用户id
+            PrefUtil.setUserId(getActivity(),user.getId());
+            DBUtil.closeDB();
             return;
         }
 
         user = new User();
         user.setStuId(PrefUtil.getUserNo(getActivity()));
         user.setName(username);
-        long id = DBUtil.insertUser(user);
+        Long id = DBUtil.insertUser(user);
         PrefUtil.setUserId(getActivity(),id);
-        PrefUtil.setUserName(getActivity(),username);
+        DBUtil.closeDB();
     }
 }

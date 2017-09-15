@@ -20,9 +20,15 @@
     <string name="dou_ban_comment">豆瓣评论</string>
     <string name="student_no">学号</string>
     <string name="password">密码</string>
-    <string name="login">登陆</string>
+    <string name="login">登录</string>
     <string name="zjxx">证件信息</string>
     <string name="dqjy">当前借阅</string>
     <string name="jyls">借阅历史</string>
     <string name="click_login">请点击登录</string>
+    <string name="create_comment">新建评论</string>
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="no_content">亲，只字未写！</string>
+    <string name="please_login">请先登录后，使用该功能</string>
+    <string name="change_account">切换账号</string>
 </resources>
