@@ -39,6 +39,7 @@ public class MyLibActivity extends BaseActivity {
                 FragmentPagerItems.with(this)
                         .add(R.string.zjxx, ZJXXFragment.class, bundle)
                         .add(R.string.dqjy, DQJYFragment.class)
+                        .add(R.string.jyls,JYLSFragment.class)
                         .create()
         );
 

@@ -22,4 +22,6 @@ public interface IBookInfoView extends ILoadView {
     void setComments(List<Comment> comments);
 
     void setBook(Book book);
+
+    void setDouBanCmtDetail(String s);
 }

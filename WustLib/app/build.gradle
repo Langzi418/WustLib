@@ -35,6 +35,8 @@ dependencies {
     })
 
 
+    compile 'com.afollestad.material-dialogs:core:0.9.4.5'
+    compile 'com.afollestad.material-dialogs:core:0.9.4.5'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
@@ -51,7 +53,6 @@ dependencies {
     compile 'org.greenrobot:greendao:3.2.2'
     compile 'com.flyco.tablayout:FlycoTabLayout_Lib:2.1.2@aar'
     compile 'com.ogaclejapan.smarttablayout:utils-v4:1.6.1@aar'
-    compile 'com.afollestad.material-dialogs:core:0.9.4.5'
     compile 'com.github.arimorty:floatingsearchview:2.1.1'
     compile 'com.moxun:tagcloudlib:1.2.0'
     compile 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.22'
@@ -59,6 +60,10 @@ dependencies {
     compile 'jp.wasabeef:glide-transformations:2.0.2'
     compile 'com.github.jd-alexander:LikeButton:0.2.1'
     compile 'com.zhy:okhttputils:2.6.2'
-    compile 'com.afollestad.material-dialogs:core:0.9.4.5'
+    compile 'com.yqritc:recyclerview-flexibledivider:1.4.0'
+    compile 'com.balysv:material-ripple:1.0.2'
+    compile 'org.sufficientlysecure:html-textview:3.4'
+    compile 'com.just.agentweb:agentweb:2.0.1'
+    compile 'com.jaeger.statusbarutil:library:1.4.0'
     testCompile 'junit:junit:4.12'
 }

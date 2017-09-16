@@ -1,10 +1,14 @@
 package com.xuzhipeng.wustlib;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
@@ -29,6 +33,11 @@ public class MainActivity extends BaseActivity  {
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavView;
     private TextView mUserTv;
+    private Spinner mSearchTypeSpinner;
+    private Spinner mDocTypeSpinner;
+    private Spinner mDisplaySpinner;
+    private Spinner mSortSpinner;
+    private Spinner mAscDesSpinner;
 
     @Override
     protected int getLayoutId() {
@@ -53,15 +62,40 @@ public class MainActivity extends BaseActivity  {
         mNavView = (NavigationView) findViewById(R.id.nav_view);
         View headerView = mNavView.getHeaderView(0);
         mUserTv = (TextView) headerView.findViewById(R.id.user_info_tv);
+
+        mSearchTypeSpinner = (Spinner) findViewById(R.id.search_type_spinner);
+        mDocTypeSpinner = (Spinner) findViewById(R.id.doc_type_spinner);
+        mDisplaySpinner = (Spinner) findViewById(R.id.display_spinner);
+        mSortSpinner = (Spinner) findViewById(R.id.sort_spinner);
+        mAscDesSpinner = (Spinner) findViewById(R.id.asc_or_des_spinner);
     }
 
     @Override
     protected void setView() {
-        mSearchView.attachNavigationDrawerToMenuButton(mDrawerLayout);
+        setSpinner(this,mSearchTypeSpinner,R.array.searchType);
+        setSpinner(this,mDocTypeSpinner,R.array.docType);
+        setSpinner(this,mDisplaySpinner,R.array.display);
+        setSpinner(this,mSortSpinner,R.array.sort);
+        setSpinner(this,mAscDesSpinner,R.array.asc_des);
     }
 
     @Override
     protected void setListener() {
+
+        /**
+         *  floatingSearchView 左边点击
+         */
+        mSearchView.setOnLeftMenuClickListener(new FloatingSearchView.OnLeftMenuClickListener() {
+            @Override
+            public void onMenuOpened() {
+                mDrawerLayout.openDrawer(Gravity.START);
+            }
+
+            @Override
+            public void onMenuClosed() {
+            }
+        });
+
         mSearchView.setOnSearchListener(new FloatingSearchView.OnSearchListener() {
             @Override
             public void onSuggestionClicked(SearchSuggestion searchSuggestion) {
@@ -71,8 +105,12 @@ public class MainActivity extends BaseActivity  {
             @Override
             public void onSearchAction(String currentQuery) {
                 Search search = new Search();
-                search.setDefault();
                 search.setStrText(currentQuery);
+                search.setStrSearchType(mSearchTypeSpinner.getSelectedItemId());
+                search.setDoctype(mDocTypeSpinner.getSelectedItemId());
+                search.setDisplaypg(mDisplaySpinner.getSelectedItemId());
+                search.setSort(mSortSpinner.getSelectedItemId());
+                search.setOrderby(mAscDesSpinner.getSelectedItemId());
                 startActivity(BookIntroActivity.newIntent
                         (MainActivity.this, search.toString(), search.getDisplaypg()));
             }
@@ -85,7 +123,11 @@ public class MainActivity extends BaseActivity  {
 
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                mDrawerLayout.closeDrawers();
                 switch (item.getItemId()) {
+                    case R.id.nav_search:
+                        mDrawerLayout.openDrawer(Gravity.END);
+                        break;
                     case R.id.nav_change:
                         //登录状态设为false
                         PrefUtil.setSuccess(MainActivity.this,false);
@@ -98,6 +140,7 @@ public class MainActivity extends BaseActivity  {
                         startActivity(CollectActivity.newIntent(MainActivity.this));
                         break;
                 }
+
                 return false;
             }
         });
@@ -137,6 +180,20 @@ public class MainActivity extends BaseActivity  {
         }else {
             mUserTv.setText(R.string.click_login);
         }
+    }
+
+
+    /**
+     * @param spinner 某个spinner
+     * @param itemsId 对应的 数据 资源 id
+     */
+    public void setSpinner(Context context, Spinner spinner, int itemsId){
+        String[] items = context.getResources().getStringArray(itemsId);
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(context,android.R.layout.simple_spinner_item,items);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
     }
 
 }

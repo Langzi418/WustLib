@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,6 +21,8 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.jaeger.library.StatusBarUtil;
 import com.like.LikeButton;
 import com.like.OnLikeListener;
 import com.xuzhipeng.wustlib.BuildConfig;
@@ -63,6 +66,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
     private BookInfoPresenter mPresenter;
 
     private DouCmtAdapter mDouAdapter;
+    private List<DouComment> mDouComments;
     private Toolbar mToolbar;
     private RecyclerView mDouCmtRv;
     private View mEmptyView;
@@ -82,6 +86,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
     //数据返回
     private int mPos;
     private boolean isBack;
+    private CoordinatorLayout mNeedOffsetView;
 
 
     public static Intent newIntent(Context context, String url) {
@@ -95,6 +100,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
     protected int getLayoutId() {
         return R.layout.activity_book_info;
     }
+
 
     @Override
     protected void initView() {
@@ -116,6 +122,12 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
 
         mLikeBtn = (LikeButton) findViewById(R.id.art_like_btn);
         mCommentIb = (ImageButton) findViewById(R.id.art_comment_ib);
+        mNeedOffsetView = (CoordinatorLayout) findViewById(R.id.need_offset_view);
+    }
+
+    @Override
+    protected void setStatusBar() {
+        StatusBarUtil.setTranslucentForImageView(this, mNeedOffsetView);
     }
 
     @Override
@@ -138,15 +150,17 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         mBookCommentRv.setLayoutManager(new LinearLayoutManager(this));
         mBookCommentRv.setAdapter(mCommentAdapter);
         mBookCommentRv.setNestedScrollingEnabled(false);
+        ViewUtil.setRvDivider(mBookCommentRv);
 
         mDouAdapter = new DouCmtAdapter(R.layout.item_dou_comment, null);
         mDouCmtRv.setLayoutManager(new LinearLayoutManager(this));
         mDouCmtRv.setAdapter(mDouAdapter);
         mDouCmtRv.setNestedScrollingEnabled(false);
+        ViewUtil.setRvDivider(mDouCmtRv);
     }
 
     /**
-     * 是否返回收集
+     * 是否返回collectActivity
      */
     @Override
     protected void setListener() {
@@ -154,7 +168,9 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         mLikeBtn.setOnLikeListener(new OnLikeListener() {
             @Override
             public void liked(LikeButton likeButton) {
-                checkLogin();
+                if (!isLogin()) {
+                    goLogin();
+                }
                 isBack = false;
             }
 
@@ -167,21 +183,24 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         mCommentIb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkLogin();
+                if (!isLogin()) {
+                    goLogin();
+                }
                 createComment();
+            }
+        });
+
+        /**
+         *  加载豆瓣评论细节
+         */
+        mDouAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                mPresenter.loadDouCmtDetail(mDouComments.get(position).getAlt());
             }
         });
     }
 
-    /**
-     *  检验登录
-     */
-    private void checkLogin(){
-        if(! PrefUtil.getSuccess(BookInfoActivity.this)){
-            startActivity(LoginActivity.newIntent(BookInfoActivity.this));
-            Toast.makeText(BookInfoActivity.this, R.string.please_login, Toast.LENGTH_SHORT).show();
-        }
-    }
 
     /**
      * 创建评论
@@ -197,8 +216,12 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction
                             which) {
-                        handleCommentDB(dialog);
-                        dialog.dismiss();
+                        if (isLogin()) {
+                            handleCommentDB(dialog);
+                            dialog.dismiss();
+                        } else {
+                            goLogin();
+                        }
                     }
                 })
                 .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -243,8 +266,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
             DBUtil.insertBook(mBook);
         }
         comment.setBookId(mBook.getId());
-
-        mCommentAdapter.insertToFirst(comment);
+        mCommentAdapter.addData(0, comment);
         DBUtil.insertComment(comment);
         DBUtil.closeDB();
     }
@@ -265,6 +287,21 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
     }
 
 
+    /**
+     * 判断是否登录
+     */
+    private boolean isLogin() {
+        return PrefUtil.getSuccess(this);
+    }
+
+    /**
+     * 去登录
+     */
+    private void goLogin() {
+        startActivity(LoginActivity.newIntent(BookInfoActivity.this));
+        Toast.makeText(BookInfoActivity.this, R.string.please_login, Toast.LENGTH_SHORT).show();
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -272,7 +309,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         boolean isLike = mLikeBtn.isLiked();
 
         //状态发生变化,并且处于登录状态
-        if (PrefUtil.getSuccess(this) && mBook.getLike() != isLike) {
+        if (isLogin() && mBook.getLike() != isLike) {
             handleLike(isLike);
         }
     }
@@ -351,7 +388,8 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
             mDouAdapter.setNewData(null);
             mDouAdapter.setEmptyView(mEmptyView2);
         } else {
-            mDouAdapter.setNewData(comments);
+            mDouComments = comments;
+            mDouAdapter.setNewData(mDouComments);
         }
 
         super.hideProgress();
@@ -371,12 +409,22 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
     public void setBook(Book book) {
         if (book == null) {
             mBook = new Book();
-        }else {
+        } else {
             mBook = book;
         }
 
         //设置 likeButton
         mLikeBtn.setLiked(mBook.getLike());
+    }
+
+    /**
+     * 设置豆瓣评论细节
+     *
+     * @param s 内容
+     */
+    @Override
+    public void setDouBanCmtDetail(String s) {
+        ViewUtil.showScrollDialog(s, this);
     }
 
     @Override
@@ -401,4 +449,6 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         }
         finish();
     }
+
+
 }

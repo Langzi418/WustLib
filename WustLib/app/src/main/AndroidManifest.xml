@@ -17,6 +17,7 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
@@ -25,11 +26,17 @@
         <activity android:name=".module.info.BookInfoActivity">
         </activity>
         <activity android:name=".module.mylib.LoginActivity">
-
         </activity>
         <activity android:name=".module.mylib.MyLibActivity">
         </activity>
         <activity android:name=".module.collection.CollectActivity">
+        </activity>
+        <activity android:name=".module.home.NoticeActivity">
+        </activity>
+        <activity android:name=".module.home.NoticeActivity">
+        </activity>
+        <activity android:name=".base.BaseWebActivity">
+
         </activity>
     </application>
 

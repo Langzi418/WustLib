@@ -46,10 +46,25 @@ public abstract class LazyLoadFragment extends Fragment implements ILoadView {
         View view = inflater.inflate(getLayoutId(),container,false);
         initView(view);
         setView();
+        setListener();
         getExtra();
+        initData();
 
         isViewCreated = true;
         return view;
+    }
+
+    /**
+     *  初始化数据
+     */
+    protected void initData() {
+    }
+
+    /**
+     *  设置监听
+     */
+    protected void setListener() {
+
     }
 
     protected void getExtra() {

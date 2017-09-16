@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
@@ -284,5 +285,43 @@ public class BookInfoPresenter extends BasePresenter<IBookInfoView> {
 
                     }
                 });
+    }
+
+    /**
+     *  加载豆瓣评论细节
+     * @param alt 链接
+     */
+    public void loadDouCmtDetail(final String alt) {
+        Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<String> e) throws Exception {
+                Response response  = HttpUtil.sendOkHttp(alt);
+                Document doc = Jsoup.parse(response.body().string());
+                Element detail = doc.select("div#link-report div").first();
+                e.onNext(detail.toString());
+                e.onComplete();
+            }
+        }).subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Observer<String>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+            }
+
+            @Override
+            public void onNext(@NonNull String s) {
+                mView.setDouBanCmtDetail(s);
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+                if(BuildConfig.DEBUG) Log.d(TAG, "DoubanDetailError: ",e);
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
     }
 }

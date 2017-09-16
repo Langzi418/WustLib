@@ -1,12 +1,8 @@
 package com.xuzhipeng.wustlib.base;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +11,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.jaeger.library.StatusBarUtil;
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.common.util.ViewUtil;
 import com.xuzhipeng.wustlib.view.ILoadView;
@@ -41,16 +38,20 @@ public abstract class BaseActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
         initView();
+        setStatusBar();
         setView();
         setListener();
         getExtra();
         initData();
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission
-                .WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]
-                    {Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-        }
+    }
+
+    /**
+     *  设置状态栏
+     */
+    protected void setStatusBar() {
+        StatusBarUtil.setColor(this,
+                ContextCompat.getColor(this,R.color.colorPrimary));
     }
 
     /**
@@ -117,21 +118,6 @@ public abstract class BaseActivity extends AppCompatActivity
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 1:
-                if( grantResults.length>0 && grantResults[0] != PackageManager.PERMISSION_GRANTED){
-                    finish();
-                }
-                break;
-            default:
-        }
     }
 
 
