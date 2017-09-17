@@ -27,8 +27,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private TextView mLoginFailTv;
 
     public static Intent newIntent(Context context) {
-        Intent intent = new Intent(context, LoginActivity.class);
-        return intent;
+        return new Intent(context,LoginActivity.class);
     }
 
     @Override
@@ -86,16 +85,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
                     Elements readCon = doc.select("div.mylib_con_con");
                     if (readCon.size() != 0) {
-//                        //需要认证
-//                        startActivity(ReaderConActivity.
-//                               newIntent(LoginActivity.this, info));
+                        //需要认证
+                        startActivity(ReaderConActivity.
+                               newIntent(LoginActivity.this, info));
                         finish();
                         return;
                     }
 
                     //不需要认证
                     startActivity(MyLibActivity.newIntent(LoginActivity.this, info));
-                    PrefUtil.setSuccess(LoginActivity.this, true);
                     finish();
                 } else {
                     final Elements trs = ele.select("tr");  //登陆失败信息

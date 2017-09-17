@@ -1,6 +1,5 @@
 package com.xuzhipeng.wustlib.base;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -30,6 +29,7 @@ public abstract class BaseActivity extends AppCompatActivity
 
 
     private MaterialDialog dialog;
+    private ActionBar mActionBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,19 +87,26 @@ public abstract class BaseActivity extends AppCompatActivity
      * toolbar
      * @param titleId  标题id
      */
-    protected void setToolbar(int  titleId, Drawable draw){
+    protected void setToolbar(int  titleId){
         Toolbar toolbar = (Toolbar) findViewById(R.id.base_toolbar);
         TextView toolbarTitle = (TextView) findViewById(R.id.base_toolbar_title);
-
         toolbarTitle.setText(getString(titleId));
-        if(draw!=null){
-            toolbar.setBackground(draw);
-        }
         setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowTitleEnabled(false);
+        mActionBar = getSupportActionBar();
+        if (mActionBar != null) {
+            mActionBar.setDisplayHomeAsUpEnabled(true);
+            mActionBar.setDisplayShowTitleEnabled(false);
+        }
+
+    }
+
+    /**
+     *  设置toolbar和图标
+     */
+    protected void setToolbar(int titleId,int iconId){
+        setToolbar(titleId);
+        if(mActionBar != null ){
+            mActionBar.setHomeAsUpIndicator(iconId);
         }
     }
 

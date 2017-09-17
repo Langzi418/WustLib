@@ -5,10 +5,8 @@ import android.util.Log;
 import com.xuzhipeng.wustlib.BuildConfig;
 import com.xuzhipeng.wustlib.db.Book;
 import com.xuzhipeng.wustlib.db.DBUtil;
-import com.xuzhipeng.wustlib.db.User;
 import com.xuzhipeng.wustlib.view.ICollectView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -36,20 +34,26 @@ public class CollectPresenter extends BasePresenter<ICollectView> {
     }
 
 
-    public void loadBooks(final long userId) {
+    public void loadBooks(final Long userId) {
         Observable.create(new ObservableOnSubscribe<List<Book>>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<List<Book>> e) throws Exception {
 
-                List<Book> books = new ArrayList<>();
-                User user = DBUtil.queryUserById(userId);
-                if(user!=null) {
+                List<Book> books = DBUtil.queryLikeBook(userId);
+//                User user = DBUtil.queryUserById(userId);
+//                if(user!=null) {
+//                    user.resetBooks();
+//                    List<Book> userBooks = user.getBooks();
+//                    //遍历，加入
+//                    for(Book book:userBooks){
+//                        if(book.getLike()){
+//                            books.add(book);
+//                        }
+//                    }
+//                    if (BuildConfig.DEBUG)
+//                        Log.d(TAG, "subscribe: " + books.size());
+//                }
 
-                    user.resetBooks();
-                    books = user.getBooks();
-                    if (BuildConfig.DEBUG)
-                        Log.d(TAG, "subscribe: " + books.size());
-                }
                 DBUtil.closeDB();
                 e.onNext(books);
                 e.onComplete();

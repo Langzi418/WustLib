@@ -51,7 +51,7 @@ public class CollectActivity extends BaseActivity implements ICollectView {
 
     @Override
     protected void setView() {
-        setToolbar(R.string.collection, null);
+        setToolbar(R.string.collection);
 
         mCollectAdapter = new CollectAdapter(R.layout.item_collection, null, this);
         mCollectRv.setAdapter(mCollectAdapter);
@@ -124,4 +124,9 @@ public class CollectActivity extends BaseActivity implements ICollectView {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mPresenter.detachView();
+    }
 }

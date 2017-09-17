@@ -31,11 +31,9 @@
     </string-array>
 
     <string-array name="asc_des">
+        <item>@string/desc</item>
         <item>@string/asc</item>
-        <item>@string/des</item>
     </string-array>
 
-    <string name="asc">升序</string>
-    <string name="des">降序</string>
 
 </resources>

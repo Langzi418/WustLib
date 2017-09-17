@@ -56,7 +56,7 @@ public class BookIntroActivity extends BaseActivity implements IBookIntroView, V
 
     @Override
     protected void initView() {
-        setToolbar(R.string.search_result, null);
+        setToolbar(R.string.search_result);
         mBookTotalTv = (TextView) findViewById(R.id.book_total_tv);
         mBooksRecyclerView = (RecyclerView) findViewById(R.id.books_recycler_view);
         mPreviousBtn = (Button) findViewById(R.id.previous_btn);
@@ -189,5 +189,9 @@ public class BookIntroActivity extends BaseActivity implements IBookIntroView, V
         }
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mPresenter.detachView();
+    }
 }

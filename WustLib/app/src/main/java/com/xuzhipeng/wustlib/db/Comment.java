@@ -21,17 +21,20 @@ public class Comment {
     private String content;
     private Date date;
     private Long bookId;
-
     private String username;
 
-    @Generated(hash = 477047191)
-    public Comment(Long id, String content, Date date, Long bookId,
-            String username) {
+    //表关联
+    private Long userId;
+
+    @Generated(hash = 473062216)
+    public Comment(Long id, String content, Date date, Long bookId, String username,
+            Long userId) {
         this.id = id;
         this.content = content;
         this.date = date;
         this.bookId = bookId;
         this.username = username;
+        this.userId = userId;
     }
 
     @Generated(hash = 1669165771)
@@ -76,6 +79,14 @@ public class Comment {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Long getUserId() {
+        return this.userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
 

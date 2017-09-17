@@ -29,7 +29,7 @@ public class DaoManager {
      * 判断是否存在数据库，如果没有则创建数据库
      * @return
      */
-    public DaoMaster getDaoMaster(){
+    private DaoMaster getDaoMaster(){
         if (daoMaster==null){
             DaoMaster.DevOpenHelper helper =
                     new DaoMaster.DevOpenHelper(App.getContext(),DB_NAME,null);
@@ -40,9 +40,8 @@ public class DaoManager {
 
     /**
      * 完成对数据库的添加、删除、修改、查询的操作，仅仅是一个接口
-     * @return
      */
-    public DaoSession getDaoSession(){
+    private DaoSession getDaoSession(){
         if (daoSession==null){
             if (daoMaster==null){
                 daoMaster = getDaoMaster();
@@ -66,7 +65,7 @@ public class DaoManager {
         return getDaoSession().getCommentDao();
     }
 
-
+    public SuggestDao getSuggestDao(){return getDaoSession().getSuggestDao();}
 
     /**
      * 关闭所有的操作,数据库开启的时候，使用完毕了必须要关闭
@@ -75,13 +74,13 @@ public class DaoManager {
         closeHelper();
         closeDaoSession();
     }
-    public  void  closeHelper(){
+    private void  closeHelper(){
         if (helper!=null){
             helper.close();
             helper = null;
         }
     }
-    public void closeDaoSession(){
+    private void closeDaoSession(){
         if (daoSession!=null){
             daoSession.clear();
             daoSession = null;

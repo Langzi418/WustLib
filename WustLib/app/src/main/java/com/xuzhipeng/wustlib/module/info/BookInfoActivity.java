@@ -262,10 +262,12 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
             mBook.setImgUrl(mImgUrl);
             mBook.setInfoUrl(mInfoUrl);
             mBook.setLike(false);
-            mBook.setUserId(-1L);
+            mBook.setUserId(PrefUtil.getUserId(this));
             DBUtil.insertBook(mBook);
         }
+
         comment.setBookId(mBook.getId());
+        comment.setUserId(PrefUtil.getUserId(this));
         mCommentAdapter.addData(0, comment);
         DBUtil.insertComment(comment);
         DBUtil.closeDB();
@@ -450,5 +452,9 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         finish();
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mPresenter.detachView();
+    }
 }

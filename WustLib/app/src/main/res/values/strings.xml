@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WustLib</string>
+    <string name="app_name">科大图书馆</string>
     <string name="load_data">加载中</string>
 
     <!--spinner-->
@@ -18,6 +18,9 @@
     <string name="sort_date">入藏日期</string>
     <string name="sort_publish">出版社</string>
     <string name="sort_publish_date">出版日期</string>
+
+    <string name="desc">降序</string>
+    <string name="asc">升序</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="notice">本馆公告</string>
@@ -65,4 +68,10 @@
     <string name="sort">排序方式</string>
     <string name="asc_des">升序或降序</string>
     <string name="no_result">亲，搜索的结果不存在。</string>
+    <string name="please_search">亲，搜索一下</string>
+    <string name="input_name">请输入姓名</string>
+    <string name="give_up">放弃</string>
+    <string name="con_fail">认证失败，请重新登录认证。</string>
+    <string name="login_out">注销</string>
+    <string name="check_log_out">亲，确认退出登录？</string>
 </resources>

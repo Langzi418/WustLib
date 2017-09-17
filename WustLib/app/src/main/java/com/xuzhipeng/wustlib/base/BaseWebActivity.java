@@ -29,7 +29,7 @@ public class BaseWebActivity extends BaseActivity {
 
     @Override
     protected void setView() {
-        setToolbar(R.string.notice_detail,null);
+        setToolbar(R.string.notice_detail);
     }
 
     @Override

@@ -35,6 +35,10 @@ public class User {
     @OrderBy("category ASC")
     private List<Book> books;
 
+    @ToMany(referencedJoinProperty = "userId")
+    @OrderBy("date DESC")
+    private List<Comment> comments;
+
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
@@ -147,6 +151,34 @@ public class User {
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getUserDao() : null;
+    }
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 1541110468)
+    public List<Comment> getComments() {
+        if (comments == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            CommentDao targetDao = daoSession.getCommentDao();
+            List<Comment> commentsNew = targetDao._queryUser_Comments(Id);
+            synchronized (this) {
+                if (comments == null) {
+                    comments = commentsNew;
+                }
+            }
+        }
+        return comments;
+    }
+
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    @Generated(hash = 249603048)
+    public synchronized void resetComments() {
+        comments = null;
     }
 
 

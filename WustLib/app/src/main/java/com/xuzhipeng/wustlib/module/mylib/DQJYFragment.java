@@ -5,6 +5,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.xuzhipeng.wustlib.BuildConfig;
@@ -39,6 +40,7 @@ public class DQJYFragment extends LazyLoadFragment {
     private MyLibHttp mLib;
     private DQJYAdapter mDQJYAdapter;
     private List<DQJY> mDQJYs;
+    private View mEmptyView;
 
     @Override
     protected int getLayoutId() {
@@ -48,6 +50,8 @@ public class DQJYFragment extends LazyLoadFragment {
     @Override
     protected void initView(View view) {
         mDqjyRv = (RecyclerView) view.findViewById(R.id.dqjy_rv);
+        mEmptyView = getLayoutInflater(null)
+                .inflate(R.layout.view_empty, (ViewGroup) mDqjyRv.getParent(),false);
     }
 
     @Override
@@ -157,8 +161,13 @@ public class DQJYFragment extends LazyLoadFragment {
 
                     @Override
                     public void onNext(@NonNull List<DQJY> dqjies) {
-                        mDQJYs = dqjies;
-                        mDQJYAdapter.setNewData(mDQJYs);
+                        if(dqjies.size()!=0){
+                            mDQJYs = dqjies;
+                            mDQJYAdapter.setNewData(mDQJYs);
+                        }else{
+                            mDQJYAdapter.setNewData(null);
+                            mDQJYAdapter.setEmptyView(mEmptyView);
+                        }
                     }
 
                     @Override

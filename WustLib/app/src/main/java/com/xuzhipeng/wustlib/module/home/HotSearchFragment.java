@@ -52,4 +52,11 @@ public class HotSearchFragment extends LazyLoadFragment implements IHotSearchVie
     public void setHotSearch(List<HotSearch> searches) {
         mAdapter.setNewData(searches);
     }
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mPresenter.detachView();
+    }
 }

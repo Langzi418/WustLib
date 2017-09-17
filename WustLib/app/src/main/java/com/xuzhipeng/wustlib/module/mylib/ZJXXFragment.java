@@ -153,6 +153,8 @@ public class ZJXXFragment extends LazyLoadFragment {
     private void checkIfInsert(String username) {
         //刷新用户名
         PrefUtil.setUserName(getActivity(),username);
+        //登录成功,可以显示用户名了
+        PrefUtil.setSuccess(getActivity(), true);
         User user = DBUtil.queryUserByStuNo(PrefUtil.getUserNo(getActivity()));
         if (user != null) {
             //用户信息存在，不存储，但刷新用户id

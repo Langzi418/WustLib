@@ -3,11 +3,17 @@ package com.xuzhipeng.wustlib.module.mylib;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.view.Menu;
+import android.view.MenuItem;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.BaseActivity;
 import com.xuzhipeng.wustlib.base.MyFragmentPagerAdapter;
+import com.xuzhipeng.wustlib.common.util.PrefUtil;
 import com.xuzhipeng.wustlib.common.util.ViewUtil;
 
 
@@ -39,7 +45,7 @@ public class MyLibActivity extends BaseActivity {
                 FragmentPagerItems.with(this)
                         .add(R.string.zjxx, ZJXXFragment.class, bundle)
                         .add(R.string.dqjy, DQJYFragment.class)
-                        .add(R.string.jyls,JYLSFragment.class)
+                        .add(R.string.jyls, JYLSFragment.class)
                         .create()
         );
 
@@ -48,6 +54,50 @@ public class MyLibActivity extends BaseActivity {
 
     @Override
     protected void setView() {
-        setToolbar(R.string.my_lib,null);
+        setToolbar(R.string.my_lib);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_toolbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.login_out:
+                new MaterialDialog.Builder(this)
+                        .content(R.string.check_log_out)
+                        .positiveText(R.string.ok)
+                        .positiveColorRes(R.color.green_light)
+                        .negativeText(R.string.give_up)
+                        .negativeColorRes(R.color.colorPrimary)
+                        .cancelable(false)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull
+                                    DialogAction which) {
+                                PrefUtil.setSuccess(MyLibActivity.this, false);
+                                PrefUtil.setUserName(MyLibActivity.this, null);
+                                PrefUtil.setUserNo(MyLibActivity.this, null);
+                                PrefUtil.setUserId(MyLibActivity.this, 0L);
+                                PrefUtil.setPwd(MyLibActivity.this, null);
+                                dialog.dismiss();
+                                finish();
+                            }
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull
+                                    DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+                break;
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

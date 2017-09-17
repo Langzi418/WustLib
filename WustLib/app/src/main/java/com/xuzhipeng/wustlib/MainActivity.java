@@ -4,20 +4,25 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.arlib.floatingsearchview.FloatingSearchView;
-import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
 import com.xuzhipeng.wustlib.base.BaseActivity;
 import com.xuzhipeng.wustlib.base.MyFragmentPagerAdapter;
 import com.xuzhipeng.wustlib.common.util.PrefUtil;
 import com.xuzhipeng.wustlib.common.util.ViewUtil;
+import com.xuzhipeng.wustlib.db.DBUtil;
 import com.xuzhipeng.wustlib.model.Search;
 import com.xuzhipeng.wustlib.module.collection.CollectActivity;
 import com.xuzhipeng.wustlib.module.home.HotBookFragment;
@@ -27,9 +32,9 @@ import com.xuzhipeng.wustlib.module.intro.BookIntroActivity;
 import com.xuzhipeng.wustlib.module.mylib.LoginActivity;
 import com.xuzhipeng.wustlib.module.mylib.MyLibActivity;
 
-public class MainActivity extends BaseActivity  {
+public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
-    private FloatingSearchView mSearchView;
+    private MaterialSearchView mSearchView;
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavView;
     private TextView mUserTv;
@@ -38,6 +43,7 @@ public class MainActivity extends BaseActivity  {
     private Spinner mDisplaySpinner;
     private Spinner mSortSpinner;
     private Spinner mAscDesSpinner;
+    private String mQuery;
 
     @Override
     protected int getLayoutId() {
@@ -58,7 +64,7 @@ public class MainActivity extends BaseActivity  {
         ViewUtil.setViewPager(adapter, this);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.draw_layout);
-        mSearchView = (FloatingSearchView) findViewById(R.id.floating_search_view);
+        mSearchView = (MaterialSearchView) findViewById(R.id.search_view);
         mNavView = (NavigationView) findViewById(R.id.nav_view);
         View headerView = mNavView.getHeaderView(0);
         mUserTv = (TextView) headerView.findViewById(R.id.user_info_tv);
@@ -72,54 +78,47 @@ public class MainActivity extends BaseActivity  {
 
     @Override
     protected void setView() {
-        setSpinner(this,mSearchTypeSpinner,R.array.searchType);
-        setSpinner(this,mDocTypeSpinner,R.array.docType);
-        setSpinner(this,mDisplaySpinner,R.array.display);
-        setSpinner(this,mSortSpinner,R.array.sort);
-        setSpinner(this,mAscDesSpinner,R.array.asc_des);
+        setToolbar(R.string.app_name, R.drawable.ic_menu);
+        mSearchView.setHint(getString(R.string.please_search));
+        setSpinner(this, mSearchTypeSpinner, R.array.searchType);
+        setSpinner(this, mDocTypeSpinner, R.array.docType);
+        setSpinner(this, mDisplaySpinner, R.array.display);
+        setSpinner(this, mSortSpinner, R.array.sort);
+        setSpinner(this, mAscDesSpinner, R.array.asc_des);
     }
 
     @Override
     protected void setListener() {
-
         /**
-         *  floatingSearchView 左边点击
+         *  搜索点击设置
          */
-        mSearchView.setOnLeftMenuClickListener(new FloatingSearchView.OnLeftMenuClickListener() {
+        mSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
-            public void onMenuOpened() {
-                mDrawerLayout.openDrawer(Gravity.START);
+            public boolean onQueryTextSubmit(String query) {
+
+                if (TextUtils.isEmpty(query)) {
+                    Toast.makeText(MainActivity.this, R.string.no_content, Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                mQuery = query;
+                goSearch(mQuery);
+                return false;
             }
 
             @Override
-            public void onMenuClosed() {
-            }
-        });
-
-        mSearchView.setOnSearchListener(new FloatingSearchView.OnSearchListener() {
-            @Override
-            public void onSuggestionClicked(SearchSuggestion searchSuggestion) {
-
-            }
-
-            @Override
-            public void onSearchAction(String currentQuery) {
-                Search search = new Search();
-                search.setStrText(currentQuery);
-                search.setStrSearchType(mSearchTypeSpinner.getSelectedItemId());
-                search.setDoctype(mDocTypeSpinner.getSelectedItemId());
-                search.setDisplaypg(mDisplaySpinner.getSelectedItemId());
-                search.setSort(mSortSpinner.getSelectedItemId());
-                search.setOrderby(mAscDesSpinner.getSelectedItemId());
-                startActivity(BookIntroActivity.newIntent
-                        (MainActivity.this, search.toString(), search.getDisplaypg()));
+            public boolean onQueryTextChange(String newText) {
+                getSuggest(newText);
+                return false;
             }
         });
+
+
 
         /**
          *  menu 点击
          */
-        mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        mNavView.setNavigationItemSelectedListener(new NavigationView
+                .OnNavigationItemSelectedListener() {
 
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -129,8 +128,6 @@ public class MainActivity extends BaseActivity  {
                         mDrawerLayout.openDrawer(Gravity.END);
                         break;
                     case R.id.nav_change:
-                        //登录状态设为false
-                        PrefUtil.setSuccess(MainActivity.this,false);
                         startActivity(LoginActivity.newIntent(MainActivity.this));
                         break;
                     case R.id.nav_mylib:
@@ -158,39 +155,109 @@ public class MainActivity extends BaseActivity  {
     }
 
     /**
-     *  根据是否登录跳转
+     * 执行 search
+     */
+    private void goSearch(String query) {
+        Search search = new Search();
+        search.setStrText(query);
+        search.setStrSearchType(mSearchTypeSpinner.getSelectedItemId());
+        search.setDoctype(mDocTypeSpinner.getSelectedItemId());
+        search.setDisplaypg(mDisplaySpinner.getSelectedItemId());
+        search.setSort(mSortSpinner.getSelectedItemId());
+        search.setOrderby(mAscDesSpinner.getSelectedItemId());
+        startActivity(BookIntroActivity.newIntent
+                (MainActivity.this, search.toString(), search.getDisplaypg()));
+    }
+
+    /**
+     * 从数据库中得到数据
+     */
+    private void getSuggest(String newText) {
+        Log.d(TAG, "getSuggest: ");
+        final String[] strings = DBUtil.querySuggestLike(newText);
+        Log.d(TAG, "strings: "+strings);
+        if (strings != null) {
+            Log.d(TAG, "getSuggest: ");
+            mSearchView.setSuggestions(strings);
+            for (int i = 0; i < strings.length; i++) {
+                Log.d(TAG, "getSuggest: " + strings[i]);
+            }
+            mSearchView.showSuggestions();
+            mSearchView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    try {
+                        goSearch((String) parent.getItemAtPosition(position));
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    }
+
+
+    /**
+     * 根据是否登录跳转
      */
     private void goIfLogin() {
-        if(PrefUtil.getSuccess(MainActivity.this)){
-            startActivity(MyLibActivity.newIntent(MainActivity.this,null));
-        }else {
+        if (PrefUtil.getSuccess(MainActivity.this)) {
+            startActivity(MyLibActivity.newIntent(MainActivity.this, null));
+        } else {
             startActivity(LoginActivity.newIntent(MainActivity.this));
         }
     }
 
 
     /**
-     *  resume 刷新
+     * resume 刷新
      */
     @Override
     protected void onResume() {
         super.onResume();
-        if(PrefUtil.getSuccess(this)){
+        if (PrefUtil.getSuccess(this)) {
             mUserTv.setText(PrefUtil.getUserName(this));
-        }else {
+        } else {
             mUserTv.setText(R.string.click_login);
         }
     }
 
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (!TextUtils.isEmpty(mQuery)) {
+            DBUtil.insertSuggest(mQuery);
+            DBUtil.closeDB();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem item = menu.findItem(R.id.action_search);
+        mSearchView.setMenuItem(item);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(Gravity.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     /**
      * @param spinner 某个spinner
      * @param itemsId 对应的 数据 资源 id
      */
-    public void setSpinner(Context context, Spinner spinner, int itemsId){
+    public void setSpinner(Context context, Spinner spinner, int itemsId) {
         String[] items = context.getResources().getStringArray(itemsId);
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(context,android.R.layout.simple_spinner_item,items);
+                new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 

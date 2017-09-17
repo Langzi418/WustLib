@@ -109,9 +109,9 @@ public class Search {
 
     public void setOrderby(long selNo) {
         if(selNo == 0L ){
-            orderby = "asc";
-        }else if(selNo == 1L){
             orderby = "desc";
+        }else if(selNo == 1L){
+            orderby = "asc";
         }
     }
 

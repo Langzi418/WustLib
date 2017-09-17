@@ -1,5 +1,7 @@
 package com.xuzhipeng.wustlib.db;
 
+import android.util.Log;
+
 import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.List;
@@ -15,8 +17,9 @@ public class DBUtil {
     private static BookDao bookDao;
     private static UserDao userDao;
     private static CommentDao commentDao;
+    private static SuggestDao suggestDao;
 
-    private static final String TAG = "DBUtil";
+    private static final String TAG = "MainActivity";
 
     private static BookDao getBookDao() {
         if (bookDao == null) {
@@ -43,6 +46,15 @@ public class DBUtil {
         return commentDao;
     }
 
+
+    private static SuggestDao getSuggestDao() {
+        if (suggestDao == null) {
+            suggestDao = DaoManager.getInstance().getSuggestDao();
+        }
+
+        return suggestDao;
+    }
+
     /**
      * 关闭数据库
      */
@@ -66,7 +78,6 @@ public class DBUtil {
     }
 
 
-
     /**
      * 根据isbn userId 找到某本书
      */
@@ -87,20 +98,76 @@ public class DBUtil {
         return getBookDao().insert(book);
     }
 
-    public static void updateBook(Book book){
+    public static void updateBook(Book book) {
         getBookDao().update(book);
     }
 
-    public static  void unlikeBook(Book book){
+    public static void unlikeBook(Book book) {
         book.setLike(false);
-        book.setUserId(-1L);
         updateBook(book);
     }
+
+    /**
+     * 查询用户喜欢的书
+     */
+    public static List<Book> queryLikeBook(Long userId) {
+        QueryBuilder<Book> builder = getBookDao().queryBuilder();
+        return builder.where(BookDao.Properties.UserId.eq(userId),
+                BookDao.Properties.Like.eq(1)).build().list();
+    }
+
 
     // 评论相关
     public static Long insertComment(Comment comment) {
         return getCommentDao().insert(comment);
     }
+
+
+    //建议相关
+    public static void insertSuggest(String name) {
+        Suggest sug = ifSuggestExists(name);
+        if (sug == null) {
+            Suggest suggest = new Suggest();
+            suggest.setName(name);
+            suggest.setTimes(1L);
+            getSuggestDao().insert(suggest);
+        } else {
+            //加一
+            sug.setTimes(sug.getTimes() + 1L);
+            updateSuggest(sug);
+        }
+    }
+
+    private static void updateSuggest(Suggest sug) {
+        getSuggestDao().update(sug);
+    }
+
+    public static String[] querySuggestLike(String str) {
+        QueryBuilder<Suggest> builder = getSuggestDao().queryBuilder();
+        List<Suggest> suggests = builder.where(SuggestDao.Properties.Name.like(str))
+                .orderDesc(SuggestDao.Properties.Times)
+                .build().list();
+        Log.d(TAG, "querySuggestLike: "+suggests.size());
+        if(suggests.size()!=0){
+            String[] strings = new String[suggests.size()];
+            for(int i=0;i<suggests.size();i++){
+                strings[i] = suggests.get(i).getName();
+            }
+            return strings;
+        }
+        return null;
+    }
+
+    private static Suggest ifSuggestExists(String name) {
+        try {
+            QueryBuilder<Suggest> builder = getSuggestDao().queryBuilder();
+            return builder.where(SuggestDao.Properties.Name.eq(name)).unique();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 
 }
