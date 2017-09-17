@@ -31,15 +31,4 @@ public class CommentAdapter extends BaseQuickAdapter<Comment, BaseViewHolder> {
                 .setText(R.id.comment_content, item.getContent());
     }
 
-//    /**
-//     *  头部插入 mData 父类
-//     */
-//    public void insertToFirst(Comment comment){
-//        if(mData == null){
-//            mData = new ArrayList<>();
-//        }
-//        mData.add(0,comment);
-//        notif yDataSetChanged();
-//    }
-
 }

@@ -29,8 +29,7 @@ public class CommentDao extends AbstractDao<Comment, Long> {
         public final static Property Content = new Property(1, String.class, "content", false, "CONTENT");
         public final static Property Date = new Property(2, java.util.Date.class, "date", false, "DATE");
         public final static Property BookId = new Property(3, Long.class, "bookId", false, "BOOK_ID");
-        public final static Property Username = new Property(4, String.class, "username", false, "USERNAME");
-        public final static Property UserId = new Property(5, Long.class, "userId", false, "USER_ID");
+        public final static Property UserId = new Property(4, Long.class, "userId", false, "USER_ID");
     }
 
     private Query<Comment> book_CommentsQuery;
@@ -52,8 +51,7 @@ public class CommentDao extends AbstractDao<Comment, Long> {
                 "\"CONTENT\" TEXT," + // 1: content
                 "\"DATE\" INTEGER," + // 2: date
                 "\"BOOK_ID\" INTEGER," + // 3: bookId
-                "\"USERNAME\" TEXT," + // 4: username
-                "\"USER_ID\" INTEGER);"); // 5: userId
+                "\"USER_ID\" INTEGER);"); // 4: userId
     }
 
     /** Drops the underlying database table. */
@@ -86,14 +84,9 @@ public class CommentDao extends AbstractDao<Comment, Long> {
             stmt.bindLong(4, bookId);
         }
  
-        String username = entity.getUsername();
-        if (username != null) {
-            stmt.bindString(5, username);
-        }
- 
         Long userId = entity.getUserId();
         if (userId != null) {
-            stmt.bindLong(6, userId);
+            stmt.bindLong(5, userId);
         }
     }
 
@@ -121,14 +114,9 @@ public class CommentDao extends AbstractDao<Comment, Long> {
             stmt.bindLong(4, bookId);
         }
  
-        String username = entity.getUsername();
-        if (username != null) {
-            stmt.bindString(5, username);
-        }
- 
         Long userId = entity.getUserId();
         if (userId != null) {
-            stmt.bindLong(6, userId);
+            stmt.bindLong(5, userId);
         }
     }
 
@@ -144,8 +132,7 @@ public class CommentDao extends AbstractDao<Comment, Long> {
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // content
             cursor.isNull(offset + 2) ? null : new java.util.Date(cursor.getLong(offset + 2)), // date
             cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3), // bookId
-            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // username
-            cursor.isNull(offset + 5) ? null : cursor.getLong(offset + 5) // userId
+            cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4) // userId
         );
         return entity;
     }
@@ -156,8 +143,7 @@ public class CommentDao extends AbstractDao<Comment, Long> {
         entity.setContent(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setDate(cursor.isNull(offset + 2) ? null : new java.util.Date(cursor.getLong(offset + 2)));
         entity.setBookId(cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3));
-        entity.setUsername(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setUserId(cursor.isNull(offset + 5) ? null : cursor.getLong(offset + 5));
+        entity.setUserId(cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4));
      }
     
     @Override

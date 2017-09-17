@@ -252,7 +252,6 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         Comment comment = new Comment();
         comment.setContent(content);
         comment.setDate(new Date());
-        comment.setUsername(PrefUtil.getUserName(this));
 
         if (mBook.getId() == null) {
             //未持久化，则持久化
