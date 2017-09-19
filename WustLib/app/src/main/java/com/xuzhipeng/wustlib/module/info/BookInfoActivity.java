@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -88,6 +89,8 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
     private boolean isBack;
     private CoordinatorLayout mNeedOffsetView;
 
+    private TextView mCollctTv;
+
 
     public static Intent newIntent(Context context, String url) {
         Intent intent = new Intent(context, BookInfoActivity.class);
@@ -123,6 +126,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         mLikeBtn = (LikeButton) findViewById(R.id.art_like_btn);
         mCommentIb = (ImageButton) findViewById(R.id.art_comment_ib);
         mNeedOffsetView = (CoordinatorLayout) findViewById(R.id.need_offset_view);
+        mCollctTv = (TextView) findViewById(R.id.collect_tv);
     }
 
     @Override
@@ -172,11 +176,13 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
                     goLogin();
                 }
                 isBack = false;
+                mCollctTv.setText(R.string.collect);
             }
 
             @Override
             public void unLiked(LikeButton likeButton) {
                 isBack = true;
+                mCollctTv.setText(R.string.un_collect);
             }
         });
 
@@ -416,6 +422,9 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
 
         //设置 likeButton
         mLikeBtn.setLiked(mBook.getLike());
+        if(mBook.getLike()){
+            mCollctTv.setText(R.string.collect);
+        }
     }
 
     /**
@@ -456,4 +465,6 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         super.onDestroy();
         mPresenter.detachView();
     }
+
+
 }

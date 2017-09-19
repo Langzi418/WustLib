@@ -3,7 +3,6 @@ package com.xuzhipeng.wustlib.module.collection;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,18 +13,27 @@ import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.BaseActivity;
 import com.xuzhipeng.wustlib.common.util.PrefUtil;
 import com.xuzhipeng.wustlib.db.Book;
+import com.xuzhipeng.wustlib.db.DBUtil;
 import com.xuzhipeng.wustlib.module.adapter.CollectAdapter;
 import com.xuzhipeng.wustlib.module.info.BookInfoActivity;
 import com.xuzhipeng.wustlib.presenter.CollectPresenter;
 import com.xuzhipeng.wustlib.view.ICollectView;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuBridge;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuCreator;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuItem;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuItemClickListener;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 
 import java.util.List;
+
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 public class CollectActivity extends BaseActivity implements ICollectView {
 
     private static final String TAG = "CollectActivity";
 
-    private RecyclerView mCollectRv;
+    private SwipeMenuRecyclerView mCollectRv;
     private CollectAdapter mCollectAdapter;
     private List<Book> mBooks;
     private CollectPresenter mPresenter;
@@ -42,7 +50,7 @@ public class CollectActivity extends BaseActivity implements ICollectView {
 
     @Override
     protected void initView() {
-        mCollectRv = (RecyclerView) findViewById(R.id.collect_rv);
+        mCollectRv = (SwipeMenuRecyclerView) findViewById(R.id.collect_rv);
 
         mEmptyView = getLayoutInflater().inflate(R.layout.view_empty,
                 (ViewGroup) mCollectRv.getParent(), false);
@@ -56,16 +64,25 @@ public class CollectActivity extends BaseActivity implements ICollectView {
         mCollectAdapter = new CollectAdapter(R.layout.item_collection, null, this);
         mCollectRv.setAdapter(mCollectAdapter);
         mCollectRv.setLayoutManager(new LinearLayoutManager(this));
-    }
+        //滑动删除
 
-    @Override
-    protected void initData() {
-        mPresenter = new CollectPresenter(this);
+        mCollectRv.setSwipeMenuCreator(new SwipeMenuCreator() {
+            @Override
+            public void onCreateMenu(SwipeMenu swipeLeftMenu, SwipeMenu swipeRightMenu, int
+                    viewType) {
+                if (mBooks != null && mBooks.size() > 0) {
+                    SwipeMenuItem deleteItem = new SwipeMenuItem(CollectActivity.this);
+                    deleteItem
+                            .setText(R.string.delete)
+                            .setImage(R.drawable.ic_delete)
+                            .setBackgroundColorResource(R.color.red_light)
+                            .setWidth(180)
+                            .setHeight(MATCH_PARENT);
+                    swipeRightMenu.addMenuItem(deleteItem);
+                }
+            }
+        });
 
-        long userId = PrefUtil.getUserId(this);
-        if (userId != 0L) {
-            mPresenter.loadBooks(userId);
-        }
     }
 
     @Override
@@ -80,6 +97,37 @@ public class CollectActivity extends BaseActivity implements ICollectView {
                 startActivityForResult(intent, 1);
             }
         });
+
+        //滑动删除监听
+        mCollectRv.setSwipeMenuItemClickListener(new SwipeMenuItemClickListener() {
+            @Override
+            public void onItemClick(SwipeMenuBridge menuBridge) {
+                int position = menuBridge.getAdapterPosition();
+                if (mBooks.size() > position) {
+                    //数据库处理
+                    DBUtil.unlikeBook(mBooks.get(position));
+                    DBUtil.closeDB();
+                    // 删除数据，并更新adapter。
+                    mBooks.remove(position);
+                    mCollectAdapter.notifyItemRemoved(position);
+                    //是否是空布局
+                    if (mBooks.size() == 0) {
+                        mCollectAdapter.setEmptyView(mEmptyView);
+                    }
+                }
+
+            }
+        });
+    }
+
+    @Override
+    protected void initData() {
+        mPresenter = new CollectPresenter(this);
+
+        long userId = PrefUtil.getUserId(this);
+        if (userId != 0L) {
+            mPresenter.loadBooks(userId);
+        }
     }
 
 
@@ -112,14 +160,15 @@ public class CollectActivity extends BaseActivity implements ICollectView {
 
 
     /**
-     *  删除收藏项
+     * 删除收藏项
      */
     private void deleteCollectItem(int pos) {
 
-        if(BuildConfig.DEBUG) Log.d(TAG, "deleteCollectItem: "+pos);
+        if (BuildConfig.DEBUG)
+            Log.d(TAG, "deleteCollectItem: " + pos);
         mBooks.remove(pos);
         mCollectAdapter.notifyItemRemoved(pos);
-        if(mBooks.size()==0){
+        if (mBooks.size() == 0) {
             mCollectAdapter.setEmptyView(mEmptyView);
         }
     }

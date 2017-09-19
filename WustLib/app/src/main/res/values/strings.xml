@@ -74,4 +74,9 @@
     <string name="con_fail">认证失败，请重新登录认证。</string>
     <string name="login_out">注销</string>
     <string name="check_log_out">亲，确认退出登录？</string>
+    <string name="delete">删除</string>
+    <string name="un_collect">未收藏</string>
+    <string name="comment">评论</string>
+    <string name="collect">已收藏</string>
+
 </resources>

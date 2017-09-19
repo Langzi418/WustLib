@@ -15,5 +15,5 @@
 
     <color name="darker_gray">@android:color/darker_gray</color>
 
-
+    <color name="white_bg">#e5eced</color>
 </resources>

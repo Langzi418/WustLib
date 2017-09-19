@@ -36,6 +36,7 @@ public class ViewUtil {
         return new MaterialDialog.Builder(context)
                 .content(contentId)
                 .progress(true,0)
+                .cancelable(false)
                 .show();
     }
 
@@ -106,13 +107,12 @@ public class ViewUtil {
      * @param recyclerView 分割线
      */
     public static void setRvDivider(RecyclerView recyclerView){
-
         recyclerView.addItemDecoration(
                 new HorizontalDividerItemDecoration
                         .Builder(recyclerView.getContext())
-                        .drawable(R.drawable.divider_bg)
+                        .colorResId(R.color.white_bg)
                         .margin(0,0)
-                        .size(16)
+                        .size(24)
                         .build());
     }
 

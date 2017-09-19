@@ -65,5 +65,6 @@ dependencies {
     compile 'com.just.agentweb:agentweb:2.0.1'
     compile 'com.jaeger.statusbarutil:library:1.4.0'
     compile 'com.miguelcatalan:materialsearchview:1.4.0'
+    compile 'com.yanzhenjie:recyclerview-swipe:1.1.2'
     testCompile 'junit:junit:4.12'
 }
