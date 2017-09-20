@@ -18,6 +18,7 @@ public class DBUtil {
     private static UserDao userDao;
     private static CommentDao commentDao;
     private static SuggestDao suggestDao;
+    private static CollectDao collectDao;
 
     private static final String TAG = "MainActivity";
 
@@ -55,6 +56,14 @@ public class DBUtil {
         return suggestDao;
     }
 
+    private static CollectDao getCollectDao() {
+        if (collectDao == null) {
+            collectDao = DaoManager.getInstance().getCollectDao();
+        }
+
+        return collectDao;
+    }
+
     /**
      * 关闭数据库
      */
@@ -63,10 +72,10 @@ public class DBUtil {
     }
 
 
+    //用户相关
     public static long insertUser(User user) {
         return getUserDao().insert(user);
     }
-
 
     public static User queryUserById(Long userId) {
         return getUserDao().loadByRowId(userId);
@@ -78,43 +87,57 @@ public class DBUtil {
     }
 
 
-    /**
-     * 根据isbn userId 找到某本书
-     */
-    public static Book queryBookIfExist(String isbn, long userId) {
+    //书相关
+    public static Book queryBookByIsbn(String isbn) {
         QueryBuilder<Book> builder = getBookDao().queryBuilder();
-        return builder
-                .where(BookDao.Properties.Isbn.eq(isbn),
-                        BookDao.Properties.UserId.eq(userId))
-                .build().unique();
-    }
-
-    public static List<Book> queryBookByIsbn(String isbn) {
-        QueryBuilder<Book> builder = getBookDao().queryBuilder();
-        return builder.where(BookDao.Properties.Isbn.eq(isbn)).build().list();
+        return builder.where(BookDao.Properties.Isbn.eq(isbn)).build().unique();
     }
 
     public static Long insertBook(Book book) {
         return getBookDao().insert(book);
     }
 
-    public static void updateBook(Book book) {
-        getBookDao().update(book);
+    public static Book queryBookById(long bookId) {
+        return getBookDao().loadByRowId(bookId);
     }
 
-    public static void unlikeBook(Book book) {
-        book.setLike(false);
-        updateBook(book);
+
+
+
+    //收藏相关
+    public static Collect queryCollect(Long userId, Long bookId) {
+        QueryBuilder<Collect> builder = getCollectDao().queryBuilder();
+        return builder.where(CollectDao.Properties.UserId.eq(userId)
+                , CollectDao.Properties.BookId.eq(bookId)).build().unique();
     }
 
-    /**
-     * 查询用户喜欢的书
-     */
-    public static List<Book> queryLikeBook(Long userId) {
-        QueryBuilder<Book> builder = getBookDao().queryBuilder();
-        return builder.where(BookDao.Properties.UserId.eq(userId),
-                BookDao.Properties.Like.eq(1)).build().list();
+    public static void updateCollect(Collect collect) {
+        getCollectDao().update(collect);
     }
+
+    //取消收藏
+    public static void unCollect(Collect collect) {
+        collect.setLike(false);
+        updateCollect(collect);
+    }
+
+    //通过用户id和bookID 取消收藏
+    public static void unCollect(Long userId,Long bookId) {
+        Collect collect = queryCollect(userId,bookId);
+        unCollect(collect);
+    }
+
+    public static void insertCollect(Collect collect) {
+        getCollectDao().insert(collect);
+    }
+
+    //用户id查询用户收藏
+    public static List<Collect> queryUserCollect(Long userId) {
+        QueryBuilder<Collect> builder = getCollectDao().queryBuilder();
+        return builder.where(CollectDao.Properties.UserId.eq(userId)
+        ,CollectDao.Properties.Like.eq(1)).build().list();
+    }
+
 
 
     // 评论相关
@@ -147,10 +170,10 @@ public class DBUtil {
         List<Suggest> suggests = builder.where(SuggestDao.Properties.Name.like(str))
                 .orderDesc(SuggestDao.Properties.Times)
                 .build().list();
-        Log.d(TAG, "querySuggestLike: "+suggests.size());
-        if(suggests.size()!=0){
+        Log.d(TAG, "querySuggestLike: " + suggests.size());
+        if (suggests.size() != 0) {
             String[] strings = new String[suggests.size()];
-            for(int i=0;i<suggests.size();i++){
+            for (int i = 0; i < suggests.size(); i++) {
                 strings[i] = suggests.get(i).getName();
             }
             return strings;

@@ -31,8 +31,6 @@ public class BookDao extends AbstractDao<Book, Long> {
         public final static Property ImgUrl = new Property(3, String.class, "imgUrl", false, "IMG_URL");
         public final static Property InfoUrl = new Property(4, String.class, "infoUrl", false, "INFO_URL");
         public final static Property Category = new Property(5, String.class, "category", false, "CATEGORY");
-        public final static Property Like = new Property(6, boolean.class, "like", false, "LIKE");
-        public final static Property UserId = new Property(7, Long.class, "userId", false, "USER_ID");
     }
 
     private DaoSession daoSession;
@@ -53,13 +51,11 @@ public class BookDao extends AbstractDao<Book, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"BOOK\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: Id
-                "\"ISBN\" TEXT," + // 1: isbn
+                "\"ISBN\" TEXT UNIQUE ," + // 1: isbn
                 "\"NAME\" TEXT," + // 2: name
                 "\"IMG_URL\" TEXT," + // 3: imgUrl
                 "\"INFO_URL\" TEXT," + // 4: infoUrl
-                "\"CATEGORY\" TEXT," + // 5: category
-                "\"LIKE\" INTEGER NOT NULL ," + // 6: like
-                "\"USER_ID\" INTEGER);"); // 7: userId
+                "\"CATEGORY\" TEXT);"); // 5: category
     }
 
     /** Drops the underlying database table. */
@@ -101,12 +97,6 @@ public class BookDao extends AbstractDao<Book, Long> {
         if (category != null) {
             stmt.bindString(6, category);
         }
-        stmt.bindLong(7, entity.getLike() ? 1L: 0L);
- 
-        Long userId = entity.getUserId();
-        if (userId != null) {
-            stmt.bindLong(8, userId);
-        }
     }
 
     @Override
@@ -142,12 +132,6 @@ public class BookDao extends AbstractDao<Book, Long> {
         if (category != null) {
             stmt.bindString(6, category);
         }
-        stmt.bindLong(7, entity.getLike() ? 1L: 0L);
- 
-        Long userId = entity.getUserId();
-        if (userId != null) {
-            stmt.bindLong(8, userId);
-        }
     }
 
     @Override
@@ -169,9 +153,7 @@ public class BookDao extends AbstractDao<Book, Long> {
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // name
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // imgUrl
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // infoUrl
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // category
-            cursor.getShort(offset + 6) != 0, // like
-            cursor.isNull(offset + 7) ? null : cursor.getLong(offset + 7) // userId
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5) // category
         );
         return entity;
     }
@@ -184,8 +166,6 @@ public class BookDao extends AbstractDao<Book, Long> {
         entity.setImgUrl(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setInfoUrl(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setCategory(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setLike(cursor.getShort(offset + 6) != 0);
-        entity.setUserId(cursor.isNull(offset + 7) ? null : cursor.getLong(offset + 7));
      }
     
     @Override
@@ -218,8 +198,8 @@ public class BookDao extends AbstractDao<Book, Long> {
         synchronized (this) {
             if (user_BooksQuery == null) {
                 QueryBuilder<Book> queryBuilder = queryBuilder();
-                queryBuilder.where(Properties.UserId.eq(null));
-                queryBuilder.orderRaw("T.'CATEGORY' ASC");
+                queryBuilder.join(Collect.class, CollectDao.Properties.BookId)
+                    .where(CollectDao.Properties.UserId.eq(userId));
                 user_BooksQuery = queryBuilder.build();
             }
         }

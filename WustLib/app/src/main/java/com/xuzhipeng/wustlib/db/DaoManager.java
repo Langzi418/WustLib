@@ -66,6 +66,7 @@ public class DaoManager {
     }
 
     public SuggestDao getSuggestDao(){return getDaoSession().getSuggestDao();}
+    public CollectDao getCollectDao(){return getDaoSession().getCollectDao();}
 
     /**
      * 关闭所有的操作,数据库开启的时候，使用完毕了必须要关闭

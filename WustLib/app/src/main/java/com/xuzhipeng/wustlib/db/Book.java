@@ -1,11 +1,15 @@
 package com.xuzhipeng.wustlib.db;
 
+import android.support.annotation.NonNull;
+
 import org.greenrobot.greendao.DaoException;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.JoinEntity;
 import org.greenrobot.greendao.annotation.OrderBy;
 import org.greenrobot.greendao.annotation.ToMany;
+import org.greenrobot.greendao.annotation.Unique;
 
 import java.util.List;
 
@@ -18,24 +22,28 @@ import java.util.List;
 
 
 @Entity
-public class Book {
-
+public class Book implements Comparable<Book>{
     @Id(autoincrement = true)
     private Long Id;
 
+    @Unique
     private String isbn;
     private String name;
     private String imgUrl;
     private String infoUrl;
     private String category;
-    private boolean like;
-
-    //表关联
-    private Long userId;
 
     @ToMany(referencedJoinProperty = "bookId")
     @OrderBy("date DESC")
     private List<Comment> comments;
+
+    @ToMany
+    @JoinEntity(
+            entity = Collect.class,
+            sourceProperty = "bookId",
+            targetProperty = "userId"
+    )
+    private List<User> users;
 
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
@@ -45,17 +53,15 @@ public class Book {
     @Generated(hash = 1097957864)
     private transient BookDao myDao;
 
-    @Generated(hash = 373681075)
+    @Generated(hash = 772161533)
     public Book(Long Id, String isbn, String name, String imgUrl, String infoUrl,
-            String category, boolean like, Long userId) {
+            String category) {
         this.Id = Id;
         this.isbn = isbn;
         this.name = name;
         this.imgUrl = imgUrl;
         this.infoUrl = infoUrl;
         this.category = category;
-        this.like = like;
-        this.userId = userId;
     }
 
     @Generated(hash = 1839243756)
@@ -110,22 +116,6 @@ public class Book {
         this.category = category;
     }
 
-    public boolean getLike() {
-        return this.like;
-    }
-
-    public void setLike(boolean like) {
-        this.like = like;
-    }
-
-    public Long getUserId() {
-        return this.userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
     /**
      * To-many relationship, resolved on first access (and after reset).
      * Changes to to-many relations are not persisted, make changes to the target entity.
@@ -152,6 +142,34 @@ public class Book {
     @Generated(hash = 249603048)
     public synchronized void resetComments() {
         comments = null;
+    }
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 633080627)
+    public List<User> getUsers() {
+        if (users == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            UserDao targetDao = daoSession.getUserDao();
+            List<User> usersNew = targetDao._queryBook_Users(Id);
+            synchronized (this) {
+                if (users == null) {
+                    users = usersNew;
+                }
+            }
+        }
+        return users;
+    }
+
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    @Generated(hash = 1027274768)
+    public synchronized void resetUsers() {
+        users = null;
     }
 
     /**
@@ -197,5 +215,11 @@ public class Book {
         myDao = daoSession != null ? daoSession.getBookDao() : null;
     }
 
+
+
+    @Override
+    public int compareTo(@NonNull Book book) {
+        return this.getCategory().compareTo(book.getCategory());
+    }
 
 }

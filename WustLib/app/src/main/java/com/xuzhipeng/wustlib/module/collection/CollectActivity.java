@@ -6,8 +6,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
-import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.xuzhipeng.wustlib.BuildConfig;
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.BaseActivity;
@@ -18,6 +18,7 @@ import com.xuzhipeng.wustlib.module.adapter.CollectAdapter;
 import com.xuzhipeng.wustlib.module.info.BookInfoActivity;
 import com.xuzhipeng.wustlib.presenter.CollectPresenter;
 import com.xuzhipeng.wustlib.view.ICollectView;
+import com.yanzhenjie.recyclerview.swipe.SwipeItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuBridge;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuCreator;
@@ -87,9 +88,9 @@ public class CollectActivity extends BaseActivity implements ICollectView {
 
     @Override
     protected void setListener() {
-        mCollectAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+        mCollectRv.setSwipeItemClickListener(new SwipeItemClickListener() {
             @Override
-            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+            public void onItemClick(View itemView, int position) {
                 Book book = mBooks.get(position);
                 Intent intent = new Intent(CollectActivity.this, BookInfoActivity.class);
                 intent.putExtra(BookInfoActivity.ARGS_URL_BOOK, book.getInfoUrl());
@@ -105,7 +106,8 @@ public class CollectActivity extends BaseActivity implements ICollectView {
                 int position = menuBridge.getAdapterPosition();
                 if (mBooks.size() > position) {
                     //数据库处理
-                    DBUtil.unlikeBook(mBooks.get(position));
+                    long userId = PrefUtil.getUserId(CollectActivity.this);
+                    DBUtil.unCollect(userId,mBooks.get(position).getId());
                     DBUtil.closeDB();
                     // 删除数据，并更新adapter。
                     mBooks.remove(position);
@@ -127,6 +129,8 @@ public class CollectActivity extends BaseActivity implements ICollectView {
         long userId = PrefUtil.getUserId(this);
         if (userId != 0L) {
             mPresenter.loadBooks(userId);
+        }else{
+            Toast.makeText(CollectActivity.this, R.string.please_login, Toast.LENGTH_SHORT).show();
         }
     }
 

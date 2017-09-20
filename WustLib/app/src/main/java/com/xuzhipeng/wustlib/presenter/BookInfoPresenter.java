@@ -4,10 +4,9 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.xuzhipeng.wustlib.BuildConfig;
-import com.xuzhipeng.wustlib.common.app.App;
 import com.xuzhipeng.wustlib.common.util.HttpUtil;
-import com.xuzhipeng.wustlib.common.util.PrefUtil;
 import com.xuzhipeng.wustlib.db.Book;
+import com.xuzhipeng.wustlib.db.Collect;
 import com.xuzhipeng.wustlib.db.Comment;
 import com.xuzhipeng.wustlib.db.DBUtil;
 import com.xuzhipeng.wustlib.model.BookStatus;
@@ -125,6 +124,76 @@ public class BookInfoPresenter extends BasePresenter<IBookInfoView> {
                 });
     }
 
+    /**
+     * 检测是否持久化
+     */
+    public void loadBook(final String isbn) {
+        Observable.create(new ObservableOnSubscribe<Book>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Book> e) throws Exception {
+                Book book = DBUtil.queryBookByIsbn(isbn);
+                DBUtil.closeDB();
+                e.onNext(book);
+                e.onComplete();
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Book>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull Book book) {
+                        mView.setBook(book);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        mView.setBook(null);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+
+    public void loadIsCollect(final Long userId, final Long bookId){
+        Observable.create(new ObservableOnSubscribe<Collect>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Collect> e) throws Exception {
+                Collect collect = DBUtil.queryCollect(userId,bookId);
+                DBUtil.closeDB();
+                e.onNext(collect);
+                e.onComplete();
+            }
+        }).subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Observer<Collect>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+            }
+
+            @Override
+            public void onNext(@NonNull Collect collect) {
+                mView.setCollect(collect);
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+                mView.setCollect(null);
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
+    }
 
     public void loadDoubanInfo(String url) {
         ApiManager.getDouBanInfoApi()
@@ -159,23 +228,18 @@ public class BookInfoPresenter extends BasePresenter<IBookInfoView> {
     }
 
     /**
-     * 通过isbn查找书籍,可能多位用户同时评论某本书，所以必须遍历所有的
+     * 通过Id 查询某本书的评论
      */
-    public void loadComment(final String isbn) {
+    public void loadComment(final Book book) {
         Observable.create(new ObservableOnSubscribe<List<Comment>>() {
 
             @Override
             public void subscribe(@NonNull ObservableEmitter<List<Comment>> e) throws Exception {
                 List<Comment> comments = new ArrayList<>();
-                List<Book> books = DBUtil.queryBookByIsbn(isbn);
-                for (int i = books.size() - 1; i >= 0; i--) {
-                    Book book = books.get(i);
+                if (book.getId() != null) {
                     book.resetComments();
-                    comments.addAll(book.getComments());
-                    if (BuildConfig.DEBUG)
-                        Log.d(TAG, "subscribe: " + comments.size());
+                    comments = book.getComments();
                 }
-
                 e.onNext(comments);
                 e.onComplete();
             }
@@ -203,6 +267,8 @@ public class BookInfoPresenter extends BasePresenter<IBookInfoView> {
                     }
                 });
     }
+
+
 
     public void loadDouBanCmt(final String url) {
         Observable.create(new ObservableOnSubscribe<List<DouComment>>() {
@@ -250,34 +316,40 @@ public class BookInfoPresenter extends BasePresenter<IBookInfoView> {
 
     }
 
+
+
+
     /**
-     * 检测是否持久化
+     * 加载豆瓣评论细节
+     *
+     * @param alt 链接
      */
-    public void loadBook(final String isbn) {
-        Observable.create(new ObservableOnSubscribe<Book>() {
+    public void loadDouCmtDetail(final String alt) {
+        Observable.create(new ObservableOnSubscribe<String>() {
             @Override
-            public void subscribe(@NonNull ObservableEmitter<Book> e) throws Exception {
-                long userId = PrefUtil.getUserId(App.getContext());
-                Book book = DBUtil.queryBookIfExist(isbn, userId);
-                e.onNext(book);
+            public void subscribe(@NonNull ObservableEmitter<String> e) throws Exception {
+                Response response = HttpUtil.sendOkHttp(alt);
+                Document doc = Jsoup.parse(response.body().string());
+                Element detail = doc.select("div#link-report div").first();
+                e.onNext(detail.toString());
                 e.onComplete();
             }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Book>() {
+                .subscribe(new Observer<String>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
-
                     }
 
                     @Override
-                    public void onNext(@NonNull Book book) {
-                        mView.setBook(book);
+                    public void onNext(@NonNull String s) {
+                        mView.setDouBanCmtDetail(s);
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        mView.setBook(null);
+                        if (BuildConfig.DEBUG)
+                            Log.d(TAG, "DoubanDetailError: ", e);
                     }
 
                     @Override
@@ -285,43 +357,5 @@ public class BookInfoPresenter extends BasePresenter<IBookInfoView> {
 
                     }
                 });
-    }
-
-    /**
-     *  加载豆瓣评论细节
-     * @param alt 链接
-     */
-    public void loadDouCmtDetail(final String alt) {
-        Observable.create(new ObservableOnSubscribe<String>() {
-            @Override
-            public void subscribe(@NonNull ObservableEmitter<String> e) throws Exception {
-                Response response  = HttpUtil.sendOkHttp(alt);
-                Document doc = Jsoup.parse(response.body().string());
-                Element detail = doc.select("div#link-report div").first();
-                e.onNext(detail.toString());
-                e.onComplete();
-            }
-        }).subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Observer<String>() {
-            @Override
-            public void onSubscribe(@NonNull Disposable d) {
-            }
-
-            @Override
-            public void onNext(@NonNull String s) {
-                mView.setDouBanCmtDetail(s);
-            }
-
-            @Override
-            public void onError(@NonNull Throwable e) {
-                if(BuildConfig.DEBUG) Log.d(TAG, "DoubanDetailError: ",e);
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
     }
 }

@@ -4,6 +4,7 @@ import org.greenrobot.greendao.DaoException;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.JoinEntity;
 import org.greenrobot.greendao.annotation.OrderBy;
 import org.greenrobot.greendao.annotation.ToMany;
 import org.greenrobot.greendao.annotation.Unique;
@@ -20,8 +21,6 @@ import java.util.List;
 @Entity
 public class User {
 
-    private static final String TAG = "User";
-
     @Id(autoincrement = true)
     private Long Id;
 
@@ -29,15 +28,18 @@ public class User {
     private String stuId;
     private String name;
 
-
-    
-    @ToMany(referencedJoinProperty = "userId")
-    @OrderBy("category ASC")
-    private List<Book> books;
-
     @ToMany(referencedJoinProperty = "userId")
     @OrderBy("date DESC")
     private List<Comment> comments;
+
+    //多对多
+    @ToMany
+    @JoinEntity(
+            entity = Collect.class,
+            sourceProperty = "userId",
+            targetProperty = "bookId"
+    )
+    private List<Book> books;
 
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
@@ -80,6 +82,34 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * To-many relationship, resolved on first access (and after reset).
+     * Changes to to-many relations are not persisted, make changes to the target entity.
+     */
+    @Generated(hash = 1541110468)
+    public List<Comment> getComments() {
+        if (comments == null) {
+            final DaoSession daoSession = this.daoSession;
+            if (daoSession == null) {
+                throw new DaoException("Entity is detached from DAO context");
+            }
+            CommentDao targetDao = daoSession.getCommentDao();
+            List<Comment> commentsNew = targetDao._queryUser_Comments(Id);
+            synchronized (this) {
+                if (comments == null) {
+                    comments = commentsNew;
+                }
+            }
+        }
+        return comments;
+    }
+
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    @Generated(hash = 249603048)
+    public synchronized void resetComments() {
+        comments = null;
     }
 
     /**
@@ -152,36 +182,6 @@ public class User {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getUserDao() : null;
     }
-
-    /**
-     * To-many relationship, resolved on first access (and after reset).
-     * Changes to to-many relations are not persisted, make changes to the target entity.
-     */
-    @Generated(hash = 1541110468)
-    public List<Comment> getComments() {
-        if (comments == null) {
-            final DaoSession daoSession = this.daoSession;
-            if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
-            }
-            CommentDao targetDao = daoSession.getCommentDao();
-            List<Comment> commentsNew = targetDao._queryUser_Comments(Id);
-            synchronized (this) {
-                if (comments == null) {
-                    comments = commentsNew;
-                }
-            }
-        }
-        return comments;
-    }
-
-    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
-    @Generated(hash = 249603048)
-    public synchronized void resetComments() {
-        comments = null;
-    }
-
-
 
 }
 

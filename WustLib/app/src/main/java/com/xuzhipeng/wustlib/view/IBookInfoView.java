@@ -1,6 +1,7 @@
 package com.xuzhipeng.wustlib.view;
 
 import com.xuzhipeng.wustlib.db.Book;
+import com.xuzhipeng.wustlib.db.Collect;
 import com.xuzhipeng.wustlib.db.Comment;
 import com.xuzhipeng.wustlib.model.DouBanInfo;
 import com.xuzhipeng.wustlib.model.DouComment;
@@ -24,4 +25,6 @@ public interface IBookInfoView extends ILoadView {
     void setBook(Book book);
 
     void setDouBanCmtDetail(String s);
+
+    void setCollect(Collect collect);
 }

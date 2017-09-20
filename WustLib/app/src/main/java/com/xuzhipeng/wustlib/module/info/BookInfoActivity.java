@@ -12,11 +12,13 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +34,7 @@ import com.xuzhipeng.wustlib.base.BaseActivity;
 import com.xuzhipeng.wustlib.common.util.PrefUtil;
 import com.xuzhipeng.wustlib.common.util.ViewUtil;
 import com.xuzhipeng.wustlib.db.Book;
+import com.xuzhipeng.wustlib.db.Collect;
 import com.xuzhipeng.wustlib.db.Comment;
 import com.xuzhipeng.wustlib.db.DBUtil;
 import com.xuzhipeng.wustlib.model.DouBanInfo;
@@ -48,6 +51,8 @@ import com.xuzhipeng.wustlib.view.IBookInfoView;
 
 import java.util.Date;
 import java.util.List;
+
+import static com.xuzhipeng.wustlib.db.DBUtil.insertBook;
 
 public class BookInfoActivity extends BaseActivity implements IBookInfoView {
 
@@ -89,7 +94,9 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
     private boolean isBack;
     private CoordinatorLayout mNeedOffsetView;
 
-    private TextView mCollctTv;
+    private TextView mCollectTv;
+    private Collect mCollect;
+    private LinearLayout mControlLl;
 
 
     public static Intent newIntent(Context context, String url) {
@@ -126,7 +133,8 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         mLikeBtn = (LikeButton) findViewById(R.id.art_like_btn);
         mCommentIb = (ImageButton) findViewById(R.id.art_comment_ib);
         mNeedOffsetView = (CoordinatorLayout) findViewById(R.id.need_offset_view);
-        mCollctTv = (TextView) findViewById(R.id.collect_tv);
+        mCollectTv = (TextView) findViewById(R.id.collect_tv);
+        mControlLl = (LinearLayout) findViewById(R.id.control_ll);
     }
 
     @Override
@@ -168,6 +176,14 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
      */
     @Override
     protected void setListener() {
+
+        mControlLl.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
+
         //是否返回
         mLikeBtn.setOnLikeListener(new OnLikeListener() {
             @Override
@@ -176,13 +192,13 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
                     goLogin();
                 }
                 isBack = false;
-                mCollctTv.setText(R.string.collect);
+                mCollectTv.setText(R.string.collect);
             }
 
             @Override
             public void unLiked(LikeButton likeButton) {
                 isBack = true;
-                mCollctTv.setText(R.string.un_collect);
+                mCollectTv.setText(R.string.un_collect);
             }
         });
 
@@ -266,9 +282,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
             mBook.setName(mName);
             mBook.setImgUrl(mImgUrl);
             mBook.setInfoUrl(mInfoUrl);
-            mBook.setLike(false);
-            mBook.setUserId(PrefUtil.getUserId(this));
-            DBUtil.insertBook(mBook);
+            insertBook(mBook);
         }
 
         comment.setBookId(mBook.getId());
@@ -316,7 +330,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         boolean isLike = mLikeBtn.isLiked();
 
         //状态发生变化,并且处于登录状态
-        if (isLogin() && mBook.getLike() != isLike) {
+        if (isLogin() && mCollect.getLike() != isLike) {
             handleLike(isLike);
         }
     }
@@ -326,26 +340,35 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
      */
     private void handleLike(boolean isLike) {
         if (isLike) {
-            //已经持久化
-            if (mBook.getId() != null) {
-                if (!mBook.getLike()) {
-                    mBook.setLike(true);
-                    mBook.setUserId(PrefUtil.getUserId(this));
-                    DBUtil.updateBook(mBook);
-                }
-            } else {
+            if (mBook.getId() == null) {
                 //未持久化
                 mBook.setIsbn(mIsbn);
                 mBook.setCategory(mCategory);
                 mBook.setName(mName);
                 mBook.setImgUrl(mImgUrl);
                 mBook.setInfoUrl(mInfoUrl);
-                mBook.setLike(true);
-                mBook.setUserId(PrefUtil.getUserId(this));
-                DBUtil.insertBook(mBook);
+                Long bookId = DBUtil.insertBook(mBook);
+                Long userId = PrefUtil.getUserId(this);
+                Collect collect = new Collect();
+                collect.setUserId(userId);
+                collect.setBookId(bookId);
+                collect.setLike(true);
+                DBUtil.insertCollect(collect);
+            } else {
+                //book已经持久化
+                if (mCollect.getId() == null) {
+                    mCollect.setBookId(mBook.getId());
+                    mCollect.setUserId(PrefUtil.getUserId(this));
+                    mCollect.setLike(true);
+                    DBUtil.insertCollect(mCollect);
+                } else {
+                    //collect已持久化
+                    mCollect.setLike(true);
+                    DBUtil.updateCollect(mCollect);
+                }
             }
         } else {
-            DBUtil.unlikeBook(mBook);
+            DBUtil.unCollect(mCollect);
         }
 
         DBUtil.closeDB();
@@ -369,9 +392,6 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
         mPresenter.loadBook(mIsbn);
         //加载豆瓣信息
         mPresenter.loadDoubanInfo(ApiManager.BASE_DOU_BAN + mIsbn);
-
-        //加载校内评论
-        mPresenter.loadComment(mIsbn);
 
         //加载豆瓣评论
         mPresenter.loadDouBanCmt(ApiManager.BASE_DOU_BAN + mIsbn + "/reviews");
@@ -420,10 +440,23 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
             mBook = book;
         }
 
-        //设置 likeButton
-        mLikeBtn.setLiked(mBook.getLike());
-        if(mBook.getLike()){
-            mCollctTv.setText(R.string.collect);
+        //加载评论
+        mPresenter.loadComment(mBook);
+        //加载是否收藏
+        mPresenter.loadIsCollect(PrefUtil.getUserId(this), mBook.getId());
+
+    }
+
+    @Override
+    public void setCollect(Collect collect) {
+        if (collect == null) {
+            mCollect = new Collect();
+        } else {
+            mCollect = collect;
+            mLikeBtn.setLiked(mCollect.getLike());
+            if (mCollect.getLike()) {
+                mCollectTv.setText(R.string.collect);
+            }
         }
     }
 
@@ -436,6 +469,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
     public void setDouBanCmtDetail(String s) {
         ViewUtil.showScrollDialog(s, this);
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
