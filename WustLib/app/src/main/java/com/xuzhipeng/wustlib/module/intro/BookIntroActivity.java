@@ -15,6 +15,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.BaseActivity;
+import com.xuzhipeng.wustlib.common.util.NetWorkUtil;
 import com.xuzhipeng.wustlib.model.BookIntro;
 import com.xuzhipeng.wustlib.module.adapter.BookIntroAdapter;
 import com.xuzhipeng.wustlib.module.info.BookInfoActivity;
@@ -92,6 +93,10 @@ public class BookIntroActivity extends BaseActivity implements IBookIntroView, V
     protected void initData() {
         mPresenter = new BookIntroPresenter(this);
         mCurPg = 1; //初始页为 1
+
+        if(!NetWorkUtil.isNetworkConnected(this)){
+            return;
+        }
 
         mPresenter.loadResult(mUrl);
         mPresenter.loadBookIntros(mUrl);

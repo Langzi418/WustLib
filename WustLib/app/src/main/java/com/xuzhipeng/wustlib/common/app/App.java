@@ -3,6 +3,8 @@ package com.xuzhipeng.wustlib.common.app;
 import android.app.Application;
 import android.content.Context;
 
+import com.xuzhipeng.wustlib.common.NetWorkReceiver;
+
 /**
  * Author: xuzhipeng
  * Email: langzi0418@gmail.com
@@ -20,6 +22,13 @@ public class App extends Application {
 
         sContext = getApplicationContext();
 
+        NetWorkReceiver.registerNet(this);
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        NetWorkReceiver.unregisterNet(this);
     }
 
     public static Context getContext(){

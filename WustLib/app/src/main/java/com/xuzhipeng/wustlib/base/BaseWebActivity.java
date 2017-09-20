@@ -13,7 +13,7 @@ import android.widget.LinearLayout;
 import com.just.library.AgentWeb;
 import com.xuzhipeng.wustlib.R;
 
-public class BaseWebActivity extends BaseActivity {
+public abstract class BaseWebActivity extends BaseActivity {
     private LinearLayout mLinearLayout;
     private AgentWeb mAgentWeb;
 
@@ -67,9 +67,7 @@ public class BaseWebActivity extends BaseActivity {
         }
     };
 
-    public String getUrl(){
-        return "https://m.jd.com/";
-    }
+    protected abstract String getUrl();
 
 
     @Override

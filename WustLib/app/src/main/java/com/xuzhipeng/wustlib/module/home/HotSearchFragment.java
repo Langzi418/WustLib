@@ -7,6 +7,7 @@ import android.view.View;
 import com.moxun.tagcloudlib.view.TagCloudView;
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.LazyLoadFragment;
+import com.xuzhipeng.wustlib.common.util.NetWorkUtil;
 import com.xuzhipeng.wustlib.model.HotSearch;
 import com.xuzhipeng.wustlib.module.adapter.HotSearchAdapter;
 import com.xuzhipeng.wustlib.presenter.HotSearchPresenter;
@@ -34,17 +35,17 @@ public class HotSearchFragment extends LazyLoadFragment implements IHotSearchVie
         TagCloudView tagView = (TagCloudView) view.findViewById(R.id.hot_search_tcv);
         mAdapter = new HotSearchAdapter(getActivity());
         tagView.setAdapter(mAdapter);
-
-        mPresenter = new HotSearchPresenter(this);
-
     }
 
 
 
     @Override
     protected void loadData() {
+        mPresenter = new HotSearchPresenter(this);
+        if(!NetWorkUtil.isNetworkConnected(getActivity())){
+            return;
+        }
         super.loadData();
-
         mPresenter.loadHotSearch(URL_HOT_SEARCH);
     }
 

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.LazyLoadFragment;
+import com.xuzhipeng.wustlib.common.util.NetWorkUtil;
 import com.xuzhipeng.wustlib.common.util.ViewUtil;
 import com.xuzhipeng.wustlib.model.JYLS;
 import com.xuzhipeng.wustlib.module.adapter.JYLSAdapter;
@@ -92,6 +93,10 @@ public class JYLSFragment extends LazyLoadFragment implements View.OnClickListen
 
     @Override
     protected void loadData() {
+        if(!NetWorkUtil.isNetworkConnected(getActivity())){
+            return;
+        }
+
         super.loadData();
 
         //加载首页
@@ -102,6 +107,11 @@ public class JYLSFragment extends LazyLoadFragment implements View.OnClickListen
      * 加载借阅历史
      */
     private void getJyls(final int page) {
+
+        if(!NetWorkUtil.isNetworkConnected(getActivity())){
+            return;
+        }
+
         Observable.create(new ObservableOnSubscribe<List<JYLS>>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<List<JYLS>> e) throws Exception {

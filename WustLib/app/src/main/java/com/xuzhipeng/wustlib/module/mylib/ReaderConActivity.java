@@ -15,6 +15,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.BaseActivity;
+import com.xuzhipeng.wustlib.common.util.NetWorkUtil;
 import com.xuzhipeng.wustlib.common.util.PrefUtil;
 
 import org.jsoup.Jsoup;
@@ -73,6 +74,10 @@ public class ReaderConActivity extends BaseActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        if(!NetWorkUtil.isNetworkConnected(this)){
+            return;
+        }
+
         switch (v.getId()) {
             case R.id.reader_con_btn:
                 if (!TextUtils.isEmpty(mReaderConInput.getText().toString())) {

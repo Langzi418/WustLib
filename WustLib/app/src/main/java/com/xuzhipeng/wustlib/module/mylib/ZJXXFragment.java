@@ -10,6 +10,7 @@ import android.view.View;
 import com.xuzhipeng.wustlib.BuildConfig;
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.LazyLoadFragment;
+import com.xuzhipeng.wustlib.common.util.NetWorkUtil;
 import com.xuzhipeng.wustlib.common.util.PrefUtil;
 import com.xuzhipeng.wustlib.db.DBUtil;
 import com.xuzhipeng.wustlib.db.User;
@@ -75,6 +76,10 @@ public class ZJXXFragment extends LazyLoadFragment {
 
     @Override
     protected void loadData() {
+        if(!NetWorkUtil.isNetworkConnected(getActivity())){
+            return;
+        }
+
         super.loadData();
         setData();
     }

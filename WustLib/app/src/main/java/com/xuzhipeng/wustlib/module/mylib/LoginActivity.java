@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.BaseActivity;
+import com.xuzhipeng.wustlib.common.util.NetWorkUtil;
 import com.xuzhipeng.wustlib.common.util.PrefUtil;
 
 import org.jsoup.Jsoup;
@@ -69,6 +70,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
      * 登陆验证
      */
     private void getCheck(final String name, final String pwd) {
+
+        if(!NetWorkUtil.isNetworkConnected(this)){
+            return;
+        }
+
         new Thread(new Runnable() {
             @Override
             public void run() {

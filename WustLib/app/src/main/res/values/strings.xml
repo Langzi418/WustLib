@@ -78,5 +78,6 @@
     <string name="un_collect">未收藏</string>
     <string name="comment">评论</string>
     <string name="collect">已收藏</string>
+    <string name="no_network">亲，网又断了</string>
 
 </resources>

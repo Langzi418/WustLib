@@ -31,6 +31,7 @@ import com.like.OnLikeListener;
 import com.xuzhipeng.wustlib.BuildConfig;
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.BaseActivity;
+import com.xuzhipeng.wustlib.common.util.NetWorkUtil;
 import com.xuzhipeng.wustlib.common.util.PrefUtil;
 import com.xuzhipeng.wustlib.common.util.ViewUtil;
 import com.xuzhipeng.wustlib.db.Book;
@@ -52,6 +53,7 @@ import com.xuzhipeng.wustlib.view.IBookInfoView;
 import java.util.Date;
 import java.util.List;
 
+import static com.xuzhipeng.wustlib.R.string.collect;
 import static com.xuzhipeng.wustlib.db.DBUtil.insertBook;
 
 public class BookInfoActivity extends BaseActivity implements IBookInfoView {
@@ -192,7 +194,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
                     goLogin();
                 }
                 isBack = false;
-                mCollectTv.setText(R.string.collect);
+                mCollectTv.setText(collect);
             }
 
             @Override
@@ -300,11 +302,18 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
 
     @Override
     protected void initData() {
+        mBook = new Book();
+        mCollect = new Collect();
         mPresenter = new BookInfoPresenter(this);
-        mPresenter.loadLibInfo(RetrofitClient.URL_BASE + mInfoUrl);
 
         //默认不返回
         isBack = false;
+
+        if (!NetWorkUtil.isNetworkConnected(this)) {
+            return;
+        }
+
+        mPresenter.loadLibInfo(RetrofitClient.URL_BASE + mInfoUrl);
     }
 
 
@@ -434,9 +443,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
 
     @Override
     public void setBook(Book book) {
-        if (book == null) {
-            mBook = new Book();
-        } else {
+        if (book != null) {
             mBook = book;
         }
 
@@ -449,9 +456,7 @@ public class BookInfoActivity extends BaseActivity implements IBookInfoView {
 
     @Override
     public void setCollect(Collect collect) {
-        if (collect == null) {
-            mCollect = new Collect();
-        } else {
+        if (collect != null) {
             mCollect = collect;
             mLikeBtn.setLiked(mCollect.getLike());
             if (mCollect.getLike()) {

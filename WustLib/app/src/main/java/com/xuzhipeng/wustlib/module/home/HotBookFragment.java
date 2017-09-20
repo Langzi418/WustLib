@@ -11,6 +11,7 @@ import com.xuzhipeng.wustlib.BuildConfig;
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.LazyLoadFragment;
 import com.xuzhipeng.wustlib.common.util.HttpUtil;
+import com.xuzhipeng.wustlib.common.util.NetWorkUtil;
 import com.xuzhipeng.wustlib.common.util.ViewUtil;
 import com.xuzhipeng.wustlib.model.HotBook;
 import com.xuzhipeng.wustlib.module.adapter.HotBookAdapter;
@@ -106,6 +107,9 @@ public class HotBookFragment extends LazyLoadFragment {
 
     @Override
     protected void loadData() {
+        if(!NetWorkUtil.isNetworkConnected(getActivity())){
+            return;
+        }
         super.loadData();
 
         Observable.create(new ObservableOnSubscribe<List<HotBook>>() {

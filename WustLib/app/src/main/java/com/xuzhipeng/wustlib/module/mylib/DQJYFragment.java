@@ -11,6 +11,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.xuzhipeng.wustlib.BuildConfig;
 import com.xuzhipeng.wustlib.R;
 import com.xuzhipeng.wustlib.base.LazyLoadFragment;
+import com.xuzhipeng.wustlib.common.util.NetWorkUtil;
 import com.xuzhipeng.wustlib.common.util.ViewUtil;
 import com.xuzhipeng.wustlib.model.DQJY;
 import com.xuzhipeng.wustlib.module.adapter.DQJYAdapter;
@@ -80,6 +81,10 @@ public class DQJYFragment extends LazyLoadFragment {
      * 处理续借
      */
     private void handleRenew(final int position) {
+        if(!NetWorkUtil.isNetworkConnected(getActivity())){
+            return;
+        }
+
         Observable.create(new ObservableOnSubscribe<String>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<String> e) throws Exception {
@@ -120,6 +125,11 @@ public class DQJYFragment extends LazyLoadFragment {
 
     @Override
     protected void loadData() {
+
+        if(!NetWorkUtil.isNetworkConnected(getActivity())){
+            return;
+        }
+
         super.loadData();
         Observable.create(new ObservableOnSubscribe<List<DQJY>>() {
             @Override
