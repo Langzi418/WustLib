@@ -180,6 +180,8 @@ public class CollectActivity extends BaseActivity implements ICollectView {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mPresenter.detachView();
+        if(mPresenter!=null) {
+            mPresenter.detachView();
+        }
     }
 }

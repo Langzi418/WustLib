@@ -37,11 +37,14 @@ public class HotSearchFragment extends LazyLoadFragment implements IHotSearchVie
         tagView.setAdapter(mAdapter);
     }
 
-
+    @Override
+    protected void initData() {
+        mPresenter = new HotSearchPresenter(this);
+    }
 
     @Override
     protected void loadData() {
-        mPresenter = new HotSearchPresenter(this);
+
         if(!NetWorkUtil.isNetworkConnected(getActivity())){
             return;
         }
