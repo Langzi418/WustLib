@@ -31,6 +31,8 @@ import com.xuzhipeng.wustlib.module.home.NoticeFragment;
 import com.xuzhipeng.wustlib.module.intro.BookIntroActivity;
 import com.xuzhipeng.wustlib.module.mylib.LoginActivity;
 import com.xuzhipeng.wustlib.module.mylib.MyLibActivity;
+import com.xuzhipeng.wustlib.module.update.UpdateActivity;
+import com.xuzhipeng.wustlib.module.update.UpdateUtil;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
@@ -52,6 +54,9 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void initView() {
+        //检测更新
+        UpdateUtil.update(this);
+
         MyFragmentPagerAdapter adapter = new MyFragmentPagerAdapter(
                 getSupportFragmentManager(),
                 FragmentPagerItems.with(this)
@@ -135,6 +140,9 @@ public class MainActivity extends BaseActivity {
                         break;
                     case R.id.nav_collection:
                         startActivity(CollectActivity.newIntent(MainActivity.this));
+                        break;
+                    case R.id.nav_about:
+                        startActivity(UpdateActivity.newIntent(MainActivity.this));
                         break;
                 }
 

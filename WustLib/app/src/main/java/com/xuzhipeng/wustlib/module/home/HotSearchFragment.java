@@ -61,6 +61,8 @@ public class HotSearchFragment extends LazyLoadFragment implements IHotSearchVie
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mPresenter.detachView();
+        if(mPresenter!=null){
+            mPresenter.detachView();
+        }
     }
 }

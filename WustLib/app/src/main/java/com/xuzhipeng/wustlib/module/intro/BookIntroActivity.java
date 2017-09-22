@@ -197,6 +197,8 @@ public class BookIntroActivity extends BaseActivity implements IBookIntroView, V
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mPresenter.detachView();
+        if(mPresenter != null){
+            mPresenter.detachView();
+        }
     }
 }

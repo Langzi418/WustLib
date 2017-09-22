@@ -35,6 +35,10 @@
         </activity>
         <activity android:name=".module.mylib.ReaderConActivity">
         </activity>
+        <activity android:name=".module.update.UpdateActivity">
+        </activity>
+        <service android:name=".module.update.UpdateService">
+        </service>
     </application>
 
 </manifest>

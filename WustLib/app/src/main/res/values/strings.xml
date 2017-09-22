@@ -79,5 +79,11 @@
     <string name="comment">评论</string>
     <string name="collect">已收藏</string>
     <string name="no_network">亲，网又断了</string>
-
+    <string name="dou_comment_cnt">豆瓣长评（%1$d）</string>
+    <string name="version_name">发现新版本：%1$s ,请升级。</string>
+    <string name="version_size">新版本大小：%1$s</string>
+    <string name="about">关于</string>
+    <string name="update">有新版本更新</string>
+    <string name="no_update">当前版本是最新版本</string>
+    <string name="app_info">应用信息</string>
 </resources>
